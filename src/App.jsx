@@ -19,16 +19,13 @@ const App = () => {
     <Router basename="/sohaibfyp">
       <Routes>
         <Route path="/" element={<MainApp />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/careers" element={<Careers />} />
-        <Route path="/NewJobs" element={<NewJobs />} />
-        <Route path="/Dashboard" element={<Dashboard />} />
-        <Route path="/applications" element={<ApplicationsScreen />} />
-        <Route
-          path="/ResumeCategorization"
-          element={<ResumeCategorization />}
-        />
-        <Route path="/JobScreen" element={<JobScreen />} />
+        <Route path="signin" element={<SignIn />} />
+        <Route path="careers" element={<Careers />} />
+        <Route path="NewJobs" element={<NewJobs />} />
+        <Route path="Dashboard" element={<Dashboard />} />
+        <Route path="applications" element={<ApplicationsScreen />} />
+        <Route path="ResumeCategorization" element={<ResumeCategorization />} />
+        <Route path="JobScreen" element={<JobScreen />} />
       </Routes>
     </Router>
   );

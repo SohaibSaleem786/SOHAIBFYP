@@ -24,7 +24,7 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar }) => {
         <ul className="space-y-4">
           <li>
             <a
-              href="/Dashboard"
+              href="Dashboard"
               className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
             >
               <FaChartLine /> {/* Dashboard Icon */}
@@ -33,7 +33,7 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar }) => {
           </li>
           <li>
             <a
-              href="/applications"
+              href="applications"
               className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
             >
               <FaUserPlus /> {/* Total Applications Icon */}
@@ -51,7 +51,7 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar }) => {
           </li>
           <li>
             <a
-              href="/JobScreen"
+              href="JobScreen"
               className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
             >
               <FaBriefcase /> {/* New Jobs Icon */}
@@ -60,7 +60,7 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar }) => {
           </li>
           <li>
             <a
-              href="/ResumeCategorization"
+              href="ResumeCategorization"
               className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
             >
               <FaFilePdf /> {/* Resume Categorization Icon */}
@@ -69,7 +69,7 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar }) => {
           </li>
           <li>
             <a
-              href="/Candidate"
+              href="Candidate"
               className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
             >
               <FaUserTie /> {/* Candidate Icon */}
@@ -78,7 +78,7 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar }) => {
           </li>
           <li>
             <a
-              href="/Projects"
+              href="Projects"
               className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
             >
               <FaProjectDiagram /> {/* Projects Icon */}
@@ -87,7 +87,7 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar }) => {
           </li>
           <li>
             <a
-              href="/Settings"
+              href="Settings"
               className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
             >
               <FaCog /> {/* Settings Icon */}
