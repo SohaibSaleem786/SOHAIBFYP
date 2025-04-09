@@ -158,10 +158,12 @@ const Dashboard = () => {
           className={`${theme === "light" ? "text-gray-800" : "text-gray-100"}`}
         />
       </button>
+
       <Sidebar
         theme={theme}
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
+        role="admin" // ya "admin" or "hr"
       />
       {/* Sidebar */}
       <div

@@ -6,6 +6,8 @@ import Team3 from "../../assets/team3.png";
 import Team4 from "../../assets/team4.jpg";
 import Team5 from "../../assets/team5.png";
 import Team6 from "../../assets/team6.png";
+import Team8 from "../../assets/team8.jpg";
+import Team9 from "../../assets/team9.jpg";
 import BlankProfile from "../../assets/blanksimage.jpeg";
 import BlankProfileGirl from "../../assets/blanksimagegirl.jpeg";
 
@@ -68,6 +70,22 @@ const TeamsData = [
   },
   {
     id: 8,
+    name: "Muhammad Abullah",
+    role: "Chief Marketing Officer (CMO)",
+    description:
+      "Crafting and executing bespoke digital marketing strategies that drive real results.",
+    image: Team9,
+  },
+  {
+    id: 9,
+    name: "Raza Ali",
+    role: "Project Manager",
+    description:
+      "Overseeing projects from start to finish, ensuring timely delivery, and managing project scope, schedule, and budget.",
+    image: Team8,
+  },
+  {
+    id: 10,
     name: "Miss Saba",
     role: "HR",
     description:

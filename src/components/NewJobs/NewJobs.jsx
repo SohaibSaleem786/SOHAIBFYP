@@ -107,16 +107,6 @@ const NewJobs = () => {
 
           // Call Signup Function
           SIGNUP();
-
-          setTimeout(() => {
-            setIsModalOpen(false);
-            setFormData({
-              name: "",
-              email: "",
-              resume: null,
-            });
-            setJobId(null);
-          }, 2000);
         } else if (response.data.error) {
           toast.error(response.data.error);
         }
@@ -131,10 +121,10 @@ const NewJobs = () => {
     const signupData = {
       name: formData.name,
       email: formData.email,
-      password: `12${formData.name.replace(" ", "")}34`,
-      status: "Candidate",
+      password: `12${formData.name.replace(/\s+/g, "")}34`,
+      status: "C",
     };
-
+    console.log(signupData);
     axios
       .post(
         "https://crystalsolutions.com.pk/sohaibfyp/signup.php",
@@ -148,6 +138,15 @@ const NewJobs = () => {
       .then((response) => {
         console.log(response, "response");
         if (response.data.message) {
+          setTimeout(() => {
+            setIsModalOpen(false);
+            setFormData({
+              name: "",
+              email: "",
+              resume: null,
+            });
+            setJobId(null);
+          }, 2000);
           toast.success(response.data.message);
         } else if (response.data.error) {
           toast.error(response.data.error);

@@ -5,17 +5,18 @@ import { FaEnvelope, FaLock } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CompanyLogo from "../../assets/logo.png"; // Replace with your company logo
+import { useTheme } from "../../ThemeContext";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
+  const { setemaill } = useTheme();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error("Please fill in all fields."); // Show error toast
+      toast.error("Please fill in all fields.");
       return;
     }
 
@@ -32,16 +33,36 @@ const SignIn = () => {
       );
 
       const data = await response.json();
+      console.log("Full response:", { status: response.status, data }); // More detailed logging
 
       if (response.ok) {
-        localStorage.setItem("token", data.token); // Store token in localStorage
+        setemaill(email);
         toast.success("Sign-in successful!");
-        navigate("/dashboard"); // Navigate to the dashboard or desired page
+
+        if (data.status === "A") {
+          navigate("/Dashboard");
+        } else if (data.status === "C") {
+          navigate("/UserDashboard");
+          toast.info("Your account status is C. Please contact support.");
+        } else {
+          toast.warning("Your account status is pending verification.");
+        }
       } else {
-        toast.error(data.error || "Invalid email or password.");
+        // More detailed error handling
+        if (response.status === 401) {
+          toast.error(
+            data.error ||
+              "Invalid credentials. Please check your email and password."
+          );
+        } else if (response.status === 404) {
+          toast.error("Account not found. Please register first.");
+        } else {
+          toast.error(data.error || "Login failed. Please try again.");
+        }
       }
     } catch (err) {
-      toast.error("An error occurred. Please try again.");
+      console.error("Login error:", err);
+      toast.error("Network error. Please check your connection.");
     }
   };
 
