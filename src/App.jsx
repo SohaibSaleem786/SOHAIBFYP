@@ -15,6 +15,8 @@ import ApplicationsScreen from "./components/Applications/Applications";
 import ResumeCategorization from "./components/ResumeCategorization/ResumeCategorization";
 import JobScreen from "./components/JobsScreen/JobsScreen";
 import NewJobs from "./components/NewJobs/NewJobs";
+import Employees from "./components/Employees/Employees";
+import AdminAttendanceManagement from "./components/AdminAttendanceManagement/AdminAttendanceManagement";
 
 const App = () => {
   return (
@@ -24,10 +26,15 @@ const App = () => {
         <Route path="signin" element={<SignIn />} />
         <Route path="careers" element={<Careers />} />
         <Route path="NewJobs" element={<NewJobs />} />
+        <Route path="Employees" element={<Employees />} />
         <Route path="Dashboard" element={<Dashboard />} />
         <Route path="UserDashboard" element={<UserDashboard />} />
-
         <Route path="applications" element={<ApplicationsScreen />} />
+        <Route
+          path="AdminAttendanceManagement"
+          element={<AdminAttendanceManagement />}
+        />
+
         <Route path="ResumeCategorization" element={<ResumeCategorization />} />
         <Route path="JobScreen" element={<JobScreen />} />
       </Routes>

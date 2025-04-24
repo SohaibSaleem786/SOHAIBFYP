@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import CompanyLogo from "../../assets/logo.png"; // Replace with your company logo
+import CompanyLogo from "../../assets/logo.jpg"; // Replace with your company logo
 import { useTheme } from "../../ThemeContext";
 
 const SignIn = () => {

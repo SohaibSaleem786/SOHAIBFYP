@@ -54,29 +54,27 @@ ChartJS.register(
 );
 
 const UserDashboard = () => {
-  const [applications, setApplications] = useState([]);
+  const [application, setApplication] = useState(null);
   const [theme, setTheme] = useState("light");
   const { getemail } = useTheme();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [candidateEmail, setCandidateEmail] = useState("");
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch applications for the specific candidate
   useEffect(() => {
     const loggedInEmail = getemail;
 
-    const fetchApplications = async () => {
+    const fetchApplication = async () => {
       try {
         const response = await fetch(
           "https://crystalsolutions.com.pk/sohaibfyp/userdashboard.php",
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
+              "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: JSON.stringify({ email: loggedInEmail }),
+            body: `email=${encodeURIComponent("sm634631@gmail.com")}`,
           }
         );
 
@@ -85,56 +83,44 @@ const UserDashboard = () => {
         }
 
         const data = await response.json();
-        console.log("data", data);
+        console.log("Fetched application:", data);
 
-        if (data.applications) {
-          setApplications(data.applications);
-          setCandidateEmail(loggedInEmail);
-        } else {
-          console.error(data.error || "Failed to fetch applications.");
+        if (data.application) {
+          setApplication(data.application);
+        } else if (data.error) {
+          console.error(data.error);
         }
+        setCandidateEmail(loggedInEmail);
       } catch (error) {
-        console.error("Error fetching applications:", error);
-        // You might want to set some error state here to show to the user
+        console.error("Error fetching application:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchApplications();
+    fetchApplication();
   }, []);
 
-  // Filter applications based on search term
-  const filteredApplications = applications.filter((app) =>
-    Object.values(app).some(
-      (val) =>
-        typeof val === "string" &&
-        val.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
-  // Group applications by status
-  const statusGroups = {
-    Pending: filteredApplications.filter((app) => app.status === "Pending"),
-    Processing: filteredApplications.filter(
-      (app) => app.status === "Processing"
-    ),
-    Accepted: filteredApplications.filter((app) => app.status === "Accepted"),
-    Rejected: filteredApplications.filter((app) => app.status === "Rejected"),
-    "Interview Scheduled": filteredApplications.filter(
-      (app) => app.status === "Interview Scheduled"
-    ),
-    "Interview Completed": filteredApplications.filter(
-      (app) => app.status === "Interview Completed"
-    ),
-  };
-
-  // Status distribution for chart
+  // Status distribution for chart (simplified since we only have one application)
   const statusDistributionData = {
-    labels: Object.keys(statusGroups),
+    labels: [
+      "Pending",
+      "Processing",
+      "Accepted",
+      "Rejected",
+      "Interview Scheduled",
+      "Interview Completed",
+    ],
     datasets: [
       {
-        data: Object.values(statusGroups).map((group) => group.length),
+        data: [
+          application?.status === "Pending" ? 1 : 0,
+          application?.status === "Processing" ? 1 : 0,
+          application?.status === "Accepted" ? 1 : 0,
+          application?.status === "Rejected" ? 1 : 0,
+          application?.status === "Interview Scheduled" ? 1 : 0,
+          application?.status === "Interview Completed" ? 1 : 0,
+        ],
         backgroundColor: [
           "#FFCE56", // Pending - yellow
           "#36A2EB", // Processing - blue
@@ -149,13 +135,13 @@ const UserDashboard = () => {
     ],
   };
 
-  // Application timeline data
+  // Application timeline data (mock data)
   const applicationTimelineData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
       {
         label: "Applications",
-        data: [1, 3, 2, 5, 4, 7],
+        data: [0, 0, 0, 1, 0, 0], // Assuming one application in April
         borderColor: "#F58634",
         backgroundColor: "rgba(245, 134, 52, 0.2)",
         tension: 0.3,
@@ -308,8 +294,8 @@ const UserDashboard = () => {
                   Welcome Back, Candidate!
                 </h1>
                 <p className="opacity-90">
-                  {applications.length > 0
-                    ? `You have ${applications.length} active applications. Keep it up!`
+                  {application
+                    ? `You have an active application for ${application.category}.`
                     : "Start your job search by applying to exciting opportunities."}
                 </p>
               </div>
@@ -327,64 +313,41 @@ const UserDashboard = () => {
           </div>
         </motion.div>
 
-        {/* Search Bar */}
-        <div className="mb-8 relative">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search applications..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full p-4 pl-12 rounded-xl shadow-sm ${
-                theme === "light"
-                  ? "bg-white border border-gray-200"
-                  : "bg-gray-700 border border-gray-600"
-              } focus:outline-none focus:ring-2 focus:ring-[#F58634] transition-all duration-300`}
-            />
-            <FaSearch
-              className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${
-                theme === "light" ? "text-gray-400" : "text-gray-300"
-              }`}
-            />
-          </div>
-        </div>
-
         {/* Application Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
             {
               title: "Total Applications",
-              value: filteredApplications.length,
+              value: application ? 1 : 0,
               icon: <FaBriefcase size={20} />,
               color: "text-[#F58634]",
               bg: "bg-orange-50",
               darkBg: "bg-gray-700",
             },
             {
-              title: "Pending Review",
-              value: statusGroups.Pending.length,
-              icon: <FaClock size={20} />,
-              color: "text-yellow-500",
-              bg: "bg-yellow-50",
+              title: "Application Status",
+              value: application ? application.status : "None",
+              icon: <FaClipboardCheck size={20} />,
+              color: "text-blue-500",
+              bg: "bg-blue-50",
               darkBg: "bg-gray-700",
             },
             {
-              title: "In Progress",
-              value:
-                statusGroups.Accepted.length +
-                statusGroups["Interview Scheduled"].length +
-                statusGroups["Interview Completed"].length,
-              icon: <FaCheck size={20} />,
+              title: "Current Level",
+              value: application
+                ? `Level ${getCurrentLevel(application.status)}`
+                : "Level 0",
+              icon: <FaChartLine size={20} />,
               color: "text-green-500",
               bg: "bg-green-50",
               darkBg: "bg-gray-700",
             },
             {
-              title: "Not Selected",
-              value: statusGroups.Rejected.length,
-              icon: <FaTimes size={20} />,
-              color: "text-red-500",
-              bg: "bg-red-50",
+              title: "Position Applied",
+              value: application ? application.category : "None",
+              icon: <FaUserTie size={20} />,
+              color: "text-purple-500",
+              bg: "bg-purple-50",
               darkBg: "bg-gray-700",
             },
           ].map((card, index) => (
@@ -407,7 +370,7 @@ const UserDashboard = () => {
                   >
                     {card.title}
                   </h2>
-                  <p className="text-3xl font-bold mt-2">{card.value}</p>
+                  <p className="text-2xl font-bold mt-2">{card.value}</p>
                 </div>
                 <div
                   className={`p-3 rounded-full ${
@@ -485,7 +448,7 @@ const UserDashboard = () => {
           }`}
         >
           <h2 className="text-lg font-semibold mb-6">
-            Your Application Pipeline
+            Your Application Progress
           </h2>
 
           <div className="mb-8">
@@ -494,9 +457,7 @@ const UserDashboard = () => {
                 <div key={step} className="flex flex-col items-center">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      applications.some(
-                        (app) => getCurrentLevel(app.status) >= step
-                      )
+                      application && getCurrentLevel(application.status) >= step
                         ? "bg-[#F58634] text-white"
                         : theme === "light"
                         ? "bg-gray-200 text-gray-400"
@@ -531,174 +492,124 @@ const UserDashboard = () => {
               <div
                 className={`absolute top-0 left-0 h-full rounded-full bg-[#F58634] transition-all duration-1000`}
                 style={{
-                  width: `${Math.min(
-                    (applications.filter(
-                      (app) => getCurrentLevel(app.status) > 0
-                    ).length /
-                      Math.max(applications.length, 1)) *
-                      100,
-                    100
-                  )}%`,
+                  width: `${
+                    application
+                      ? (getCurrentLevel(application.status) / 4) * 100
+                      : 0
+                  }%`,
                 }}
               ></div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            {filteredApplications.length > 0 ? (
-              filteredApplications.map((app) => (
-                <motion.div
-                  key={app.id}
-                  whileHover={{ y: -5 }}
-                  className={`p-5 rounded-lg border transition-all duration-300 ${
-                    theme === "light"
-                      ? "bg-white border-gray-200 hover:shadow-md"
-                      : "bg-gray-700 border-gray-600 hover:shadow-lg"
-                  }`}
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-start space-x-4">
-                      <div
-                        className={`p-3 rounded-full ${
-                          theme === "light" ? "bg-gray-100" : "bg-gray-600"
+          {/* Application Details */}
+          {application ? (
+            <motion.div
+              whileHover={{ y: -5 }}
+              className={`p-5 rounded-lg border transition-all duration-300 ${
+                theme === "light"
+                  ? "bg-white border-gray-200 hover:shadow-md"
+                  : "bg-gray-700 border-gray-600 hover:shadow-lg"
+              }`}
+            >
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div className="flex items-start space-x-4">
+                  <div
+                    className={`p-3 rounded-full ${
+                      theme === "light" ? "bg-gray-100" : "bg-gray-600"
+                    }`}
+                  >
+                    {getStatusIcon(application.status)}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">
+                      {application.jobcode ? `${application.jobcode} - ` : ""}
+                      {application.category}
+                    </h3>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${getStatusColor(
+                          application.status
+                        )}`}
+                      >
+                        {application.status}
+                      </span>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          theme === "light"
+                            ? "bg-gray-100 text-gray-800"
+                            : "bg-gray-600 text-gray-100"
                         }`}
                       >
-                        {getStatusIcon(app.status)}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">
-                          {app.jobcode} - {app.category}
-                        </h3>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <span
-                            className={`text-xs px-2 py-1 rounded-full ${getStatusColor(
-                              app.status
-                            )}`}
-                          >
-                            {app.status}
-                          </span>
-                          <span
-                            className={`text-xs px-2 py-1 rounded-full ${
-                              theme === "light"
-                                ? "bg-gray-100 text-gray-800"
-                                : "bg-gray-600 text-gray-100"
-                            }`}
-                          >
-                            Level {getCurrentLevel(app.status)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-4 md:mt-0 flex space-x-3">
-                      <a
-                        href={`https://crystalsolutions.com.pk/sohaibfyp/upload/${app.resume_path}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`inline-flex items-center px-4 py-2 rounded-lg text-sm ${
-                          theme === "light"
-                            ? "bg-[#F58634] text-white hover:bg-[#e5732a]"
-                            : "bg-gray-600 text-gray-100 hover:bg-gray-500"
-                        } transition-all duration-300`}
-                      >
-                        <FaFilePdf className="mr-2" />
-                        View Resume
-                      </a>
-                      {app.status === "Interview Scheduled" && (
-                        <button
-                          className={`inline-flex items-center px-4 py-2 rounded-lg text-sm ${
-                            theme === "light"
-                              ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
-                              : "bg-blue-900 text-blue-100 hover:bg-blue-800"
-                          } transition-all duration-300`}
-                        >
-                          <FaCalendarAlt className="mr-2" />
-                          View Details
-                        </button>
-                      )}
+                        Level {getCurrentLevel(application.status)}
+                      </span>
                     </div>
                   </div>
-
-                  {/* Interview details if scheduled */}
-                  {app.status === "Interview Scheduled" &&
-                    app.interview_date && (
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <h4 className="text-sm font-medium mb-2">
-                          Interview Scheduled
-                        </h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div className="flex items-center">
-                            <FaCalendarAlt
-                              className={`mr-3 ${
-                                theme === "light"
-                                  ? "text-gray-500"
-                                  : "text-gray-300"
-                              }`}
-                            />
-                            <div>
-                              <p className="text-xs text-gray-500">Date</p>
-                              <p>
-                                {new Date(
-                                  app.interview_date
-                                ).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center">
-                            <FaClock
-                              className={`mr-3 ${
-                                theme === "light"
-                                  ? "text-gray-500"
-                                  : "text-gray-300"
-                              }`}
-                            />
-                            <div>
-                              <p className="text-xs text-gray-500">Time</p>
-                              <p>{app.interview_time}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center">
-                            <FaMapMarkerAlt
-                              className={`mr-3 ${
-                                theme === "light"
-                                  ? "text-gray-500"
-                                  : "text-gray-300"
-                              }`}
-                            />
-                            <div>
-                              <p className="text-xs text-gray-500">Location</p>
-                              <p>{app.interview_location || "Online"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                </motion.div>
-              ))
-            ) : (
-              <div
-                className={`p-8 text-center rounded-lg ${
-                  theme === "light" ? "bg-gray-50" : "bg-gray-600"
-                }`}
-              >
-                <p className="text-gray-500">
-                  {searchTerm
-                    ? "No applications match your search."
-                    : "You haven't submitted any applications yet."}
-                </p>
-                {!searchTerm && (
-                  <button
-                    className={`mt-4 px-6 py-2 rounded-lg font-medium ${
+                </div>
+                <div className="mt-4 md:mt-0 flex space-x-3">
+                  <a
+                    href={`https://crystalsolutions.com.pk/sohaibfyp/upload/${application.resume_path}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center px-4 py-2 rounded-lg text-sm ${
                       theme === "light"
                         ? "bg-[#F58634] text-white hover:bg-[#e5732a]"
-                        : "bg-gray-500 text-white hover:bg-gray-400"
+                        : "bg-gray-600 text-gray-100 hover:bg-gray-500"
                     } transition-all duration-300`}
                   >
-                    Browse Jobs
-                  </button>
-                )}
+                    <FaFilePdf className="mr-2" />
+                    View Resume
+                  </a>
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* Additional details */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500">Applied On</p>
+                    <p>April 2023</p>{" "}
+                    {/* You might want to add application date to your API */}
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Position</p>
+                    <p>{application.category}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Current Status</p>
+                    <p className="font-medium">{application.status}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Progress Level</p>
+                    <p>Level {getCurrentLevel(application.status)} of 4</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <div
+              className={`p-8 text-center rounded-lg ${
+                theme === "light" ? "bg-gray-50" : "bg-gray-600"
+              }`}
+            >
+              <p className="text-gray-500">
+                {loading
+                  ? "Loading your application..."
+                  : "You haven't submitted any applications yet."}
+              </p>
+              {!loading && (
+                <button
+                  className={`mt-4 px-6 py-2 rounded-lg font-medium ${
+                    theme === "light"
+                      ? "bg-[#F58634] text-white hover:bg-[#e5732a]"
+                      : "bg-gray-500 text-white hover:bg-gray-400"
+                  } transition-all duration-300`}
+                >
+                  Browse Jobs
+                </button>
+              )}
+            </div>
+          )}
         </motion.div>
 
         {/* Tips Section */}

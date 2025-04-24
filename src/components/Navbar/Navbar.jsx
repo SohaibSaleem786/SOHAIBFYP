@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { IoMdMenu, IoMdClose } from "react-icons/io";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import Logo from "../../assets/logo.png";
+import Logo from "../../assets/logo.jpg";
 import axios from "axios"; // Add axios for API call
 
 const NavbarMenu = [
@@ -82,7 +82,12 @@ const Navbar = () => {
         {/* Logo section */}
         <div className="flex items-center">
           <img src={Logo} className="w-16 ml-4" alt="Logo" />
-          <h1 className="font-bold text-xl">Crystal Solution</h1>
+          <h1
+            className="font-bold text-xl"
+            style={{ marginLeft: "10px", color: "#F58634" }}
+          >
+            SMART RECRUITER ASSISTANT{" "}
+          </h1>
         </div>
 
         {/* Desktop Menu section */}

@@ -21,7 +21,9 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar, role }) => {
         isSidebarOpen ? "translate-x-0" : "-translate-x-64"
       } sm:translate-x-0`}
     >
-      <h1 className="text-1xl font-bold mb-8">CRYSTAL SOLUTIONS</h1>
+      <h1 className="text-2xl fontDSZA-bold mb-8 text-center">
+        SMART RECRUITER ASSISTANT
+      </h1>
       <nav>
         <ul className="space-y-4">
           {/* Candidate-specific Menu */}
@@ -78,6 +80,15 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar, role }) => {
               </li>
               <li>
                 <a
+                  href="ResumeCategorization"
+                  className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
+                >
+                  <FaFilePdf />
+                  <span>AI Resume Analyzation</span>
+                </a>
+              </li>
+              <li>
+                <a
                   href="applications"
                   className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
                 >
@@ -85,13 +96,23 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar, role }) => {
                   <span>Total Application</span>
                 </a>
               </li>
+
               <li>
                 <a
-                  href="#"
+                  href="employees"
                   className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
                 >
                   <FaUsers />
                   <span>Total Employees</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="AdminAttendanceManagement"
+                  className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
+                >
+                  <FaUsers />
+                  <span>Attendance Management</span>
                 </a>
               </li>
               <li>
@@ -103,15 +124,7 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar, role }) => {
                   <span>New Jobs</span>
                 </a>
               </li>
-              <li>
-                <a
-                  href="ResumeCategorization"
-                  className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
-                >
-                  <FaFilePdf />
-                  <span>Resume Categorization</span>
-                </a>
-              </li>
+
               <li>
                 <a
                   href="Candidate"
