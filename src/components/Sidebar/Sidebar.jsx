@@ -21,9 +21,7 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar, role }) => {
         isSidebarOpen ? "translate-x-0" : "-translate-x-64"
       } sm:translate-x-0`}
     >
-      <h1 className="text-2xl fontDSZA-bold mb-8 text-center">
-        SMART RECRUITER ASSISTANT
-      </h1>
+      <h1 className="text-2xl fontDSZA-bold mb-8 text-center">S R A</h1>
       <nav>
         <ul className="space-y-4">
           {/* Candidate-specific Menu */}
@@ -40,11 +38,11 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar, role }) => {
               </li>
               <li>
                 <a
-                  href="MyJobs"
+                  href="InterviewSchedule"
                   className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
                 >
                   <FaBriefcase />
-                  <span>My Jobs</span>
+                  <span>Interview Time</span>
                 </a>
               </li>
               <li>
@@ -89,6 +87,15 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar, role }) => {
               </li>
               <li>
                 <a
+                  href="AdminInterviewScheduleScreen"
+                  className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
+                >
+                  <FaBriefcase />
+                  <span>Interview Schedule</span>
+                </a>
+              </li>
+              <li>
+                <a
                   href="applications"
                   className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
                 >
@@ -112,7 +119,7 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar, role }) => {
                   className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
                 >
                   <FaUsers />
-                  <span>Attendance Management</span>
+                  <span>Attendance </span>
                 </a>
               </li>
               <li>

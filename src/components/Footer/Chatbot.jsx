@@ -42,7 +42,7 @@ const Chatbot = () => {
               className="bg-primary text-white p-4 flex justify-between items-center"
               style={{ backgroundColor: "#f58634" }}
             >
-              <h3 className="font-bold">Crystal Chatbot</h3>
+              <h3 className="font-bold">S R A Chatbot</h3>
               <button
                 onClick={toggleChat}
                 className="text-white hover:text-gray-200"

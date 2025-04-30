@@ -4,21 +4,26 @@ import { motion } from "framer-motion";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import CompanyLogo from "../../assets/logo.jpg"; // Replace with your company logo
+import CompanyLogo from "../../assets/logo.jpg";
 import { useTheme } from "../../ThemeContext";
-
+import axios from "axios";
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const { setemaill } = useTheme();
-  const handleSubmit = async (e) => {
+
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error("Please fill in all fields.");
+      toast.error("Please enter both email and password.");
       return;
     }
+
+    setIsProcessing(true);
 
     try {
       const response = await fetch(
@@ -32,53 +37,91 @@ const SignIn = () => {
         }
       );
 
-      const data = await response.json();
-      console.log("Full response:", { status: response.status, data }); // More detailed logging
+      const text = await response.text();
+      let data;
 
-      if (response.ok) {
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error("Failed to parse response as JSON:", parseError);
+        data = {
+          error: 500,
+          message: "Server returned invalid response format. Please try again.",
+        };
+      }
+
+      if (data.error === 200) {
+        toast.success(data.message || "Login successful.");
         setemaill(email);
-        toast.success("Sign-in successful!");
 
-        if (data.status === "A") {
+        const userStatus = data.user?.status;
+        if (userStatus === "A") {
           navigate("/Dashboard");
-        } else if (data.status === "C") {
+        } else if (userStatus === "C") {
+          toast.info(
+            "Your account is currently closed. Please contact support."
+          );
           navigate("/UserDashboard");
-          toast.info("Your account status is C. Please contact support.");
         } else {
-          toast.warning("Your account status is pending verification.");
+          toast.warning("Your account is pending verification.");
         }
       } else {
-        // More detailed error handling
-        if (response.status === 401) {
-          toast.error(
-            data.error ||
-              "Invalid credentials. Please check your email and password."
-          );
-        } else if (response.status === 404) {
-          toast.error("Account not found. Please register first.");
-        } else {
-          toast.error(data.error || "Login failed. Please try again.");
-        }
+        toast.error(
+          data.message || `Login failed (${data.error}). Please try again.`
+        );
       }
-    } catch (err) {
-      console.error("Login error:", err);
-      toast.error("Network error. Please check your connection.");
+    } catch (error) {
+      console.error("Error during login:", error);
+      toast.error("An unexpected error occurred. Please try again later.");
+    } finally {
+      setIsProcessing(false);
     }
   };
+  async function handleForgotPassword(e) {
+    e.preventDefault();
+
+    const data = {
+      email: email,
+      new_password: "12345678",
+    };
+    console.log(data, "data");
+    try {
+      // Send as JSON instead of form data
+      const response = await axios.post(
+        "https://crystalsolutions.com.pk/sohaibfyp/forgetpassword.php",
+        data, // Send the data object directly (will be JSON-stringified by axios)
+        {
+          headers: {
+            "Content-Type": "application/json", // Change content type to JSON
+          },
+        }
+      );
+
+      console.log(response, "response");
+      const { status, message } = response.data;
+
+      if (status === "success") {
+        toast.success(message, { autoClose: 3000 });
+        // Add any navigation or state updates here
+      } else {
+        toast.error(message, { autoClose: 3000 });
+      }
+    } catch (error) {
+      toast.dismiss();
+      toast.error("An error occurred. Please try again.", {
+        autoClose: 3000,
+      });
+      console.error("Forgot password error:", error);
+    }
+  }
 
   return (
-    <div
-      style={{
-        background: "white",
-      }}
-      className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[#F58634] to-[#FFA64D]"
-    >
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-white to-white">
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md"
       >
-        {/* Company Logo */}
         <div className="flex justify-center mb-6">
           <img
             src={CompanyLogo}
@@ -87,14 +130,14 @@ const SignIn = () => {
           />
         </div>
 
-        {/* Welcome Message */}
         <h2 className="text-3xl font-bold mb-6 text-center text-[#F58634]">
-          Welcome Back!
+          {isForgotPassword ? "Reset Password" : "Welcome Back!"}
         </h2>
 
-        {/* Sign In Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email Input */}
+        <form
+          onSubmit={isForgotPassword ? handleForgotPassword : handleLogin}
+          className="space-y-6"
+        >
           <div>
             <label
               htmlFor="email"
@@ -118,52 +161,78 @@ const SignIn = () => {
             </div>
           </div>
 
-          {/* Password Input */}
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
-            <div className="mt-1 relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaLock className="h-5 w-5 text-gray-400" />
+          {!isForgotPassword && (
+            <>
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Password
+                </label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaLock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-3 py-2 w-full rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#F58634] focus:border-[#F58634]"
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
               </div>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-3 py-2 w-full rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#F58634] focus:border-[#F58634]"
-                placeholder="Enter your password"
-                required
-              />
-            </div>
-          </div>
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPassword(true)}
+                  className="text-sm text-[#F58634] hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+            </>
+          )}
 
-          {/* Sign In Button */}
           <button
             type="submit"
-            className="w-full bg-[#F58634] text-white py-2 rounded-md hover:bg-[#e5732a] transition duration-300 flex items-center justify-center"
+            disabled={isProcessing}
+            className="w-full bg-[#F58634] text-white py-2 rounded-md hover:bg-[#e5732a] transition duration-300 flex items-center justify-center disabled:opacity-70"
           >
-            Sign In
+            {isProcessing
+              ? "Processing..."
+              : isForgotPassword
+              ? "Reset Password"
+              : "Sign In"}
           </button>
-        </form>
 
-        {/* Sign Up Link */}
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Don't have an account?{" "}
-          <a
-            href="/signup"
-            className="text-[#F58634] hover:underline font-semibold"
-          >
-            Sign Up
-          </a>
-        </p>
+          {isForgotPassword ? (
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setIsForgotPassword(false)}
+                className="text-sm text-[#F58634] hover:underline"
+              >
+                Back to Sign In
+              </button>
+            </div>
+          ) : (
+            <p className="mt-6 text-center text-sm text-gray-600">
+              Don't have an account?{" "}
+              <a
+                href="/signup"
+                className="text-[#F58634] hover:underline font-semibold"
+              >
+                Sign Up
+              </a>
+            </p>
+          )}
+        </form>
       </motion.div>
 
-      {/* Toast Container */}
       <ToastContainer
         position="top-right"
         autoClose={5000}

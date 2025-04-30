@@ -10,13 +10,14 @@ import SignIn from "./components/SignIn/SignIn"; // Import SignIn component
 import Careers from "./components/Careers/Careers";
 import Dashboard from "./components/Dashboard/Dashboard";
 import UserDashboard from "./components/UserDashboard/UserDashboard";
-
 import ApplicationsScreen from "./components/Applications/Applications";
 import ResumeCategorization from "./components/ResumeCategorization/ResumeCategorization";
 import JobScreen from "./components/JobsScreen/JobsScreen";
 import NewJobs from "./components/NewJobs/NewJobs";
 import Employees from "./components/Employees/Employees";
 import AdminAttendanceManagement from "./components/AdminAttendanceManagement/AdminAttendanceManagement";
+import InterviewSchedule from "./components/InterviewSchedule/InterviewSchedule";
+import AdminInterviewScheduleScreen from "./components/AdminInterviewScheduleScreen/AdminInterviewScheduleScreen";
 
 const App = () => {
   return (
@@ -30,11 +31,15 @@ const App = () => {
         <Route path="Dashboard" element={<Dashboard />} />
         <Route path="UserDashboard" element={<UserDashboard />} />
         <Route path="applications" element={<ApplicationsScreen />} />
+        <Route path="InterviewSchedule" element={<InterviewSchedule />} />
+        <Route
+          path="AdminInterviewScheduleScreen"
+          element={<AdminInterviewScheduleScreen />}
+        />
         <Route
           path="AdminAttendanceManagement"
           element={<AdminAttendanceManagement />}
         />
-
         <Route path="ResumeCategorization" element={<ResumeCategorization />} />
         <Route path="JobScreen" element={<JobScreen />} />
       </Routes>

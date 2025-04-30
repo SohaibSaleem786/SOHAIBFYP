@@ -12,6 +12,7 @@ import {
   FaTrash,
   FaEdit,
   FaSearch,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -26,6 +27,8 @@ const Employees = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentEmployee, setCurrentEmployee] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState(null);
   const [newEmployee, setNewEmployee] = useState({
     name: "",
     email: "",
@@ -102,30 +105,45 @@ const Employees = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this employee?")) {
-      const data = { id };
-      const formData = new URLSearchParams(data).toString();
+  const handleDeleteClick = (employee) => {
+    setEmployeeToDelete(employee);
+    setShowDeleteConfirmation(true);
+  };
 
-      axios
-        .post(`${API_BASE_URL}/deleteemployee.php`, formData, {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        })
-        .then((response) => {
-          const { error, message } = response.data;
-          if (error === 200) {
-            toast.success(message);
-            fetchEmployees();
-          } else {
-            toast.error(message);
-          }
-        })
-        .catch((error) => {
-          toast.error("An error occurred during deletion. Please try again.");
-        });
-    }
+  const confirmDelete = () => {
+    if (!employeeToDelete) return;
+
+    const data = { id: employeeToDelete.id };
+    const formData = new URLSearchParams(data).toString();
+
+    axios
+      .post(`${API_BASE_URL}/deleteemployee.php`, formData, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      })
+      .then((response) => {
+        console.log(response, "response", employeeToDelete.id);
+        const { error, message } = response.data;
+        if (error === 200) {
+          toast.success(message);
+          fetchEmployees();
+        } else {
+          toast.error(message);
+        }
+      })
+      .catch((error) => {
+        toast.error("An error occurred during deletion. Please try again.");
+      })
+      .finally(() => {
+        setShowDeleteConfirmation(false);
+        setEmployeeToDelete(null);
+      });
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirmation(false);
+    setEmployeeToDelete(null);
   };
 
   const resetForm = () => {
@@ -273,7 +291,7 @@ const Employees = () => {
                         <FaEdit />
                       </button>
                       <button
-                        onClick={() => handleDelete(employee.id)}
+                        onClick={() => handleDeleteClick(employee)}
                         className="text-red-500 hover:text-red-700"
                       >
                         <FaTrash />
@@ -292,6 +310,7 @@ const Employees = () => {
           </table>
         </div>
 
+        {/* Add/Edit Employee Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div
@@ -399,6 +418,51 @@ const Employees = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirmation && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div
+              className={`p-6 rounded-lg shadow-lg w-full max-w-md ${
+                theme === "light" ? "bg-white" : "bg-gray-800"
+              }`}
+            >
+              <div className="flex flex-col items-center space-y-4">
+                <div className="p-3 rounded-full bg-red-100 text-red-600">
+                  <FaExclamationTriangle size={24} />
+                </div>
+                <h2 className="text-xl font-bold text-center">
+                  Confirm Deletion
+                </h2>
+                <p className="text-center">
+                  Are you sure you want to delete{" "}
+                  <span className="font-semibold">
+                    {employeeToDelete?.name}
+                  </span>
+                  ? This action cannot be undone.
+                </p>
+                <div className="flex justify-center space-x-4 w-full mt-4">
+                  <button
+                    onClick={cancelDelete}
+                    className={`px-4 py-2 rounded-md ${
+                      theme === "light"
+                        ? "bg-gray-300 hover:bg-gray-400"
+                        : "bg-gray-600 hover:bg-gray-500"
+                    } transition-colors duration-300`}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDelete}
+                    className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors duration-300"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
