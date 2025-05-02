@@ -1,60 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { IoMdMenu, IoMdClose } from "react-icons/io";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.jpg";
-import axios from "axios"; // Add axios for API call
-
-const NavbarMenu = [
-  {
-    id: 1,
-    title: "Home",
-    path: "/",
-  },
-  {
-    id: 2,
-    title: "Services",
-    link: "#services",
-  },
-  {
-    id: 3,
-    title: "Our Team",
-    link: "#team",
-  },
-  {
-    id: 4,
-    title: "Contact Us",
-    link: "#contact",
-  },
-  {
-    id: 5,
-    title: "Join Us",
-    link: "/sohaibfyp/careers",
-  },
-  {
-    id: 6,
-    title: "New Jobs",
-    link: "/sohaibfyp/NewJobs",
-  },
-];
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [jobCount, setJobCount] = useState(0); // New state for job count
+  const [jobCount, setJobCount] = useState(0);
+  const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleScroll = (id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+  const handleNavigation = (path) => {
+    if (path.startsWith("#")) {
+      // Handle scroll to section
+      const element = document.getElementById(path.replace("#", ""));
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+      setIsMobileMenuOpen(false);
+    } else {
+      // Handle router navigation
+      navigate(path);
+      setIsMobileMenuOpen(false);
     }
   };
 
-  const API_BASE_URL = "https://crystalsolutions.com.pk/sohaibfyp";
   const fetchJobs = () => {
+    const API_BASE_URL = "https://crystalsolutions.com.pk/sohaibfyp";
     fetch(`${API_BASE_URL}/getjobs.php`)
       .then((response) => response.json())
       .then((data) => {
@@ -66,14 +41,23 @@ const Navbar = () => {
       })
       .catch((error) => console.error("Error fetching jobs:", error));
   };
+
   useEffect(() => {
     fetchJobs();
   }, []);
+
+  const navItems = [
+    { id: 1, title: "Home", path: "/" },
+    { id: 2, title: "Services", path: "#services" },
+    { id: 3, title: "Our Team", path: "#team" },
+    { id: 4, title: "Contact Us", path: "#contact" },
+    { id: 5, title: "About Us", path: "/about-us" },
+    { id: 6, title: "Join Us", path: "/careers" },
+    { id: 7, title: "New Jobs", path: "/new-jobs", showBadge: true },
+  ];
+
   return (
-    <nav
-      className="fixed top-0 left-0 w-full z-50"
-      style={{ backgroundColor: "#f7f7f7", opacity: "0.9" }}
-    >
+    <nav className="fixed top-0 left-0 w-full z-50 bg-[#f7f7f7] bg-opacity-90">
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -81,58 +65,53 @@ const Navbar = () => {
       >
         {/* Logo section */}
         <div className="flex items-center">
-          <img src={Logo} className="w-16 ml-4" alt="Logo" />
-          <h1
-            className="font-bold text-xl"
-            style={{ marginLeft: "10px", color: "#F58634" }}
-          >
-            SMART RECRUITER ASSISTANT{" "}
-          </h1>
+          <Link to="/" className="flex items-center">
+            <img src={Logo} className="w-16 ml-4" alt="Logo" />
+            <h1 className="font-bold text-xl ml-2.5 text-[#F58634]">
+              SMART RECRUITER ASSISTANT
+            </h1>
+          </Link>
         </div>
 
         {/* Desktop Menu section */}
         <div className="hidden lg:block">
           <ul className="flex items-center gap-3">
-            {NavbarMenu.map((menu) => (
-              <li key={menu.id} className="relative">
-                <a
-                  href={menu.link || menu.path}
-                  className="inline-block py-2 px-3 hover:text-[#F58634] relative group"
-                  onClick={() => {
-                    if (menu.link) {
-                      handleScroll(menu.link.replace("#", ""));
-                    }
-                  }}
+            {navItems.map((item) => (
+              <li key={item.id} className="relative">
+                <button
+                  onClick={() => handleNavigation(item.path)}
+                  className="inline-block py-2 px-3 hover:text-[#F58634] transition-colors duration-200"
                 >
-                  <div className="w-2 h-2 bg-[#F58634] absolute mt-4 rounded-full left-1/2 -translate-x-1/2 top-1/2 bottom-0 group-hover:block hidden"></div>
-                  {menu.title}
-                  {menu.title === "New Jobs" && jobCount > 0 && (
-                    <span className="absolute bottom-6 right-0 bg-orange-600 text-white text-xs font-bold rounded-full py-1 px-3 animate-pulse">
+                  {item.title}
+                  {item.showBadge && jobCount > 0 && (
+                    <span className="absolute -top-1 -right-2 bg-orange-600 text-white text-xs font-bold rounded-full py-1 px-2 animate-pulse">
                       {jobCount}
                     </span>
                   )}
-                </a>
+                </button>
               </li>
             ))}
-            <Link to="/signin">
-              <button
-                className="primary-btn"
-                style={{ backgroundColor: "#F58634", color: "white" }}
-              >
-                Sign In
-              </button>
-            </Link>
+            <li>
+              <Link to="/signin">
+                <button
+                  className="primary-btn ml-2"
+                  style={{ backgroundColor: "#F58634", color: "white" }}
+                >
+                  Sign In
+                </button>
+              </Link>
+            </li>
           </ul>
         </div>
 
         {/* Mobile Hamburger menu section */}
-        <div className="lg:hidden">
-          <button onClick={toggleMobileMenu}>
-            {isMobileMenuOpen ? (
-              <IoMdClose className="text-3xl" />
-            ) : (
-              <IoMdMenu className="text-3xl" />
-            )}
+        <div className="lg:hidden mr-4">
+          <button
+            onClick={toggleMobileMenu}
+            aria-label="Toggle menu"
+            className="text-3xl focus:outline-none"
+          >
+            {isMobileMenuOpen ? <IoMdClose /> : <IoMdMenu />}
           </button>
         </div>
       </motion.div>
@@ -142,37 +121,34 @@ const Navbar = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="lg:hidden bg-[#f7f7f7] w-full"
+          className="lg:hidden bg-[#f7f7f7] w-full shadow-lg"
         >
           <ul className="flex flex-col items-center gap-3 py-4">
-            {NavbarMenu.map((menu) => (
-              <li key={menu.id} className="relative">
-                <a
-                  href={menu.link || menu.path}
-                  className="inline-block py-2 px-3 hover:text-secondary"
-                  onClick={() => {
-                    if (menu.link) {
-                      handleScroll(menu.link.replace("#", ""));
-                    }
-                  }}
+            {navItems.map((item) => (
+              <li key={item.id} className="relative w-full text-center">
+                <button
+                  onClick={() => handleNavigation(item.path)}
+                  className="inline-block py-2 px-3 hover:text-[#F58634] w-full"
                 >
-                  {menu.title}
-                  {menu.title === "New Jobs" && jobCount > 0 && (
-                    <span className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold rounded-full py-1 px-3 animate-pulse">
+                  {item.title}
+                  {item.showBadge && jobCount > 0 && (
+                    <span className="absolute top-0 right-10 bg-red-600 text-white text-xs font-bold rounded-full py-1 px-2 animate-pulse">
                       {jobCount}
                     </span>
                   )}
-                </a>
+                </button>
               </li>
             ))}
-            <Link to="/signin">
-              <button
-                className="primary-btn mt-2"
-                style={{ backgroundColor: "#F58634", color: "#2A2E53" }}
-              >
-                Sign In
-              </button>
-            </Link>
+            <li className="w-full text-center mt-2">
+              <Link to="/signin" className="block">
+                <button
+                  className="primary-btn"
+                  style={{ backgroundColor: "#F58634", color: "white" }}
+                >
+                  Sign In
+                </button>
+              </Link>
+            </li>
           </ul>
         </motion.div>
       )}

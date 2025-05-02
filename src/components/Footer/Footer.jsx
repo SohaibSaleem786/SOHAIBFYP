@@ -120,7 +120,7 @@ const Footer = () => {
           </div>
         </motion.div>
       </footer>
-      <Chatbot />
+      {/* <Chatbot /> */}
     </section>
   );
 };
