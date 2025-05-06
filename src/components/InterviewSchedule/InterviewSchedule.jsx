@@ -18,6 +18,8 @@ import { motion } from "framer-motion";
 import Sidebar from "../Sidebar/Sidebar";
 import UserHeader from "../UserHeader/UserHeader";
 import { useTheme } from "../../ThemeContext";
+import axios from "axios";
+import { EmailAccount } from "../../Auth";
 
 const InterviewSchedule = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -25,107 +27,58 @@ const InterviewSchedule = () => {
   const { getemail } = useTheme();
   const [interviews, setInterviews] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const emailaccount = EmailAccount();
   useEffect(() => {
-    const loggedInEmail = getemail;
-
     const fetchInterviews = async () => {
       try {
-        const response = await fetch(
-          "https://crystalsolutions.com.pk/sohaibfyp/interviews.php",
+        const response = await axios.post(
+          "https://crystalsolutions.com.pk/sohaibfyp/get_interview.php",
+          new URLSearchParams({ email: getemail || emailaccount }), // send as x-www-form-urlencoded
           {
-            method: "POST",
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: `email=${encodeURIComponent("sm634631@gmail.com")}`,
           }
         );
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
+        const data = response.data;
         console.log("Fetched interviews:", data);
 
-        if (data.interviews) {
-          setInterviews(data.interviews);
+        if (data.status === "success" && data.interviews) {
+          const formattedInterviews = data.interviews.map((interview) => ({
+            id: interview.id,
+            position: interview.position,
+            date: interview.date,
+            time: interview.time,
+            duration: interview.duration,
+            type: interview.type,
+            interviewer: interview.interviewer,
+            interviewer_position: interview.interviewer_position,
+            location: interview.location,
+            meeting_link: interview.meeting_link,
+            instructions: interview.instructions,
+            status: interview.status,
+            address:
+              interview.location && interview.type.toLowerCase() === "in-person"
+                ? interview.location
+                : null,
+          }));
+
+          setInterviews(formattedInterviews);
         } else {
-          // For demonstration purposes, set mock interview data
-          setInterviews([
-            {
-              id: 1,
-              position: "Frontend Developer",
-              date: "2023-05-15",
-              time: "10:00 AM",
-              duration: "45 minutes",
-              type: "Video Call",
-              interviewer: "Sarah Johnson",
-              interviewer_position: "Senior Developer",
-              location: "Zoom Meeting",
-              meeting_link: "sohaibcreatingameetinglink",
-              instructions:
-                "Please prepare a brief introduction about yourself and your recent projects. Have your portfolio ready to share.",
-              status: "Scheduled",
-            },
-            {
-              id: 2,
-              position: "UX/UI Designer",
-              date: "2023-05-18",
-              time: "02:30 PM",
-              duration: "60 minutes",
-              type: "In-person",
-              interviewer: "Michael Chen",
-              interviewer_position: "Design Lead",
-              address: "123 Business Avenue, Tech Park",
-              instructions:
-                "Please bring your portfolio and be prepared to discuss your design process.",
-              status: "Scheduled",
-            },
-          ]);
+          setInterviews([]);
         }
       } catch (error) {
         console.error("Error fetching interviews:", error);
-        // Set mock data for demonstration
-        setInterviews([
-          {
-            id: 1,
-            position: "Frontend Developer",
-            date: "2023-05-15",
-            time: "10:00 AM",
-            duration: "45 minutes",
-            type: "Video Call",
-            interviewer: "Sarah Johnson",
-            interviewer_position: "Senior Developer",
-            location: "Zoom Meeting",
-            meeting_link: "https://zoom.us/j/123456789",
-
-            instructions:
-              "Please prepare a brief introduction about yourself and your recent projects. Have your portfolio ready to share.",
-            status: "Scheduled",
-          },
-          {
-            id: 2,
-            position: "UX/UI Designer",
-            date: "2023-05-18",
-            time: "02:30 PM",
-            duration: "60 minutes",
-            type: "In-person",
-            interviewer: "Michael Chen",
-            interviewer_position: "Design Lead",
-
-            instructions:
-              "Please bring your portfolio and be prepared to discuss your design process.",
-            status: "Scheduled",
-          },
-        ]);
+        setInterviews([]);
       } finally {
         setLoading(false);
       }
     };
 
+    // if (getemail) {
     fetchInterviews();
+    // }
   }, []);
 
   // Toggle theme
@@ -140,6 +93,7 @@ const InterviewSchedule = () => {
 
   // Format date
   const formatDate = (dateString) => {
+    if (!dateString) return "Date not specified";
     const options = {
       weekday: "long",
       year: "numeric",
@@ -151,6 +105,7 @@ const InterviewSchedule = () => {
 
   // Check if interview is upcoming
   const isUpcoming = (dateString) => {
+    if (!dateString) return false;
     const interviewDate = new Date(dateString);
     const today = new Date();
     return interviewDate >= today;
@@ -164,6 +119,7 @@ const InterviewSchedule = () => {
 
   // Get interview type icon
   const getInterviewTypeIcon = (type) => {
+    if (!type) return <FaUserTie />;
     switch (type.toLowerCase()) {
       case "video call":
         return <FaVideo />;
@@ -195,6 +151,7 @@ const InterviewSchedule = () => {
           className={`${theme === "light" ? "text-gray-800" : "text-gray-100"}`}
         />
       </button>
+
       <Sidebar
         theme={theme}
         isSidebarOpen={isSidebarOpen}
@@ -358,7 +315,8 @@ const InterviewSchedule = () => {
                                 : "text-gray-300"
                             }
                           >
-                            {interview.time} ({interview.duration})
+                            {interview.time || "Time not specified"}
+                            {interview.duration && ` (${interview.duration})`}
                           </p>
                         </div>
                       </div>
@@ -383,7 +341,7 @@ const InterviewSchedule = () => {
                                 : "text-gray-300"
                             }
                           >
-                            {interview.position}
+                            {interview.position || "Position not specified"}
                           </p>
                         </div>
                       </div>
@@ -404,7 +362,7 @@ const InterviewSchedule = () => {
                                 : "text-gray-300"
                             }
                           >
-                            {interview.type}
+                            {interview.type || "Type not specified"}
                           </p>
                         </div>
                       </div>
@@ -429,7 +387,7 @@ const InterviewSchedule = () => {
                                 : "text-gray-300"
                             }
                           >
-                            {interview.location}
+                            {interview.location || "Location not specified"}
                             {interview.address && (
                               <span className="block text-xs mt-1">
                                 {interview.address}
@@ -455,10 +413,13 @@ const InterviewSchedule = () => {
                                 : "text-gray-300"
                             }
                           >
-                            {interview.interviewer}
-                            <span className="block text-xs mt-1">
-                              {interview.interviewer_position}
-                            </span>
+                            {interview.interviewer ||
+                              "Interviewer not specified"}
+                            {interview.interviewer_position && (
+                              <span className="block text-xs mt-1">
+                                {interview.interviewer_position}
+                              </span>
+                            )}
                           </p>
                         </div>
                       </div>
@@ -466,34 +427,32 @@ const InterviewSchedule = () => {
 
                     {/* Meeting Info and Actions */}
                     <div>
-                      {interview.type.toLowerCase() === "video call" && (
-                        <div
-                          className={`p-4 rounded-lg mb-3 ${
-                            theme === "light" ? "bg-gray-50" : "bg-gray-600"
-                          }`}
-                        >
-                          <h3 className="font-medium mb-2">Meeting Details</h3>
-                          {interview.meeting_link && (
-                            <a
-                              href={interview.meeting_link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`block mb-2 ${
-                                theme === "light"
-                                  ? "text-blue-600 hover:text-blue-800"
-                                  : "text-blue-400 hover:text-blue-300"
-                              }`}
-                            >
-                              Join Meeting
-                            </a>
-                          )}
-                          {interview.meeting_id && (
-                            <p className="text-sm">
-                              ID: {interview.meeting_id}
-                            </p>
-                          )}
-                        </div>
-                      )}
+                      {interview.type &&
+                        interview.type.toLowerCase() === "video call" && (
+                          <div
+                            className={`p-4 rounded-lg mb-3 ${
+                              theme === "light" ? "bg-gray-50" : "bg-gray-600"
+                            }`}
+                          >
+                            <h3 className="font-medium mb-2">
+                              Meeting Details
+                            </h3>
+                            {interview.meeting_link && (
+                              <a
+                                href={interview.meeting_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`block mb-2 ${
+                                  theme === "light"
+                                    ? "text-blue-600 hover:text-blue-800"
+                                    : "text-blue-400 hover:text-blue-300"
+                                }`}
+                              >
+                                Join Meeting
+                              </a>
+                            )}
+                          </div>
+                        )}
                       <div className="flex space-x-2 mt-2">
                         <button
                           className={`flex-1 px-4 py-2 rounded ${

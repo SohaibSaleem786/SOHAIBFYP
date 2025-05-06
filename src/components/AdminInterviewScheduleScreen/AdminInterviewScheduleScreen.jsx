@@ -14,6 +14,7 @@ import {
   FaInfoCircle,
   FaBriefcase,
   FaCalendarPlus,
+  FaFilter,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Sidebar from "../Sidebar/Sidebar";
@@ -28,18 +29,26 @@ const AdminInterviewSchedule = () => {
   const [loading, setLoading] = useState(true);
   const [reschedulingId, setReschedulingId] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [interviewLevel, setInterviewLevel] = useState(1); // Default to level 1
+  const [filterStatus, setFilterStatus] = useState("all"); // 'all', 'pending', 'confirmed'
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        // Fetch only level 1 applications
-        const response = await fetch("get_applications.php", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: "level=1", // Only get applications with level 1
-        });
+        setLoading(true);
+
+        // Create form data
+        const formData = new FormData();
+        formData.append("level", interviewLevel);
+
+        const response = await fetch(
+          "https://crystalsolutions.com.pk/sohaibfyp/applicationfilterbylevel.php",
+          {
+            method: "POST",
+            body: formData, // Send as form-data
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -48,12 +57,12 @@ const AdminInterviewSchedule = () => {
         const data = await response.json();
         console.log("Fetched applications:", data);
 
-        if (data.applications) {
-          // Transform applications into interviews format
-          const formattedInterviews = data.applications.map((app) => ({
+        if (data.applicants) {
+          const formattedInterviews = data.applicants.map((app) => ({
             id: app.id,
+            name: app.name,
             position: app.category,
-            date: generateInterviewDate(1), // Default date (tomorrow)
+            date: generateInterviewDate(1),
             time: "10:00 AM",
             duration: "45 minutes",
             type: "Video Call",
@@ -66,6 +75,9 @@ const AdminInterviewSchedule = () => {
             status: "Pending",
             application_id: app.id,
             candidate_email: app.email,
+            application_status: app.status,
+            jobcode: app.jobcode,
+            level: app.level,
           }));
           setInterviews(formattedInterviews);
         } else {
@@ -80,7 +92,7 @@ const AdminInterviewSchedule = () => {
     };
 
     fetchApplications();
-  }, []);
+  }, [interviewLevel]);
 
   // Generate interview date (n days from today)
   const generateInterviewDate = (daysFromNow) => {
@@ -146,66 +158,68 @@ const AdminInterviewSchedule = () => {
   // Handle confirm interview
   const handleConfirm = async (interview) => {
     try {
-      // First, save the interview details
-      const saveInterviewResponse = await fetch("save_interview.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          application_id: interview.application_id,
-          candidate_email: interview.candidate_email,
-          position: interview.position,
-          date: interview.date,
-          time: interview.time,
-          duration: interview.duration,
-          type: interview.type,
-          interviewer: interview.interviewer,
-          interviewer_position: interview.interviewer_position,
-          location: interview.location,
-          meeting_link: interview.meeting_link,
-          instructions: interview.instructions,
-        }),
-      });
+      // Step 1: Save interview details using FormData
+      const interviewFormData = new FormData();
+      interviewFormData.append("application_id", interview.application_id);
+      interviewFormData.append("candidate_email", interview.candidate_email);
+      interviewFormData.append("position", interview.position);
+      interviewFormData.append("date", interview.date);
+      interviewFormData.append("time", interview.time);
+      interviewFormData.append("duration", interview.duration);
+      interviewFormData.append("type", interview.type);
+      interviewFormData.append("interviewer", interview.interviewer);
+      interviewFormData.append(
+        "interviewer_position",
+        interview.interviewer_position
+      );
+      interviewFormData.append("location", interview.location);
+      interviewFormData.append("meeting_link", interview.meeting_link);
+      interviewFormData.append("instructions", interview.instructions);
+      interviewFormData.append("status", "Confirmed");
+
+      const saveInterviewResponse = await fetch(
+        "https://crystalsolutions.com.pk/sohaibfyp/save_interview.php",
+        {
+          method: "POST",
+          body: interviewFormData, // form-data
+        }
+      );
 
       if (!saveInterviewResponse.ok) {
         throw new Error(`HTTP error! status: ${saveInterviewResponse.status}`);
       }
 
-      // Then update the application level to 2
-      const updateLevelResponse = await fetch("update_application_level.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          application_id: interview.application_id,
-          level: 2, // Update to level 2
-        }),
-      });
+      // Step 2: Update application level using FormData
+      const newLevel = interviewLevel + 1;
+      const updateLevelFormData = new FormData();
+      updateLevelFormData.append("application_id", interview.application_id);
+      updateLevelFormData.append("level", newLevel);
+
+      const updateLevelResponse = await fetch(
+        "https://crystalsolutions.com.pk/sohaibfyp/update_application_level.php",
+        {
+          method: "POST",
+          body: updateLevelFormData,
+        }
+      );
 
       if (!updateLevelResponse.ok) {
         throw new Error(`HTTP error! status: ${updateLevelResponse.status}`);
       }
 
-      // Update local state
+      // Step 3: Update local state
       setInterviews((prevInterviews) =>
-        prevInterviews.map((item) => {
-          if (item.id === interview.id) {
-            return {
-              ...item,
-              status: "Confirmed",
-            };
-          }
-          return item;
-        })
+        prevInterviews.map((item) =>
+          item.id === interview.id
+            ? { ...item, status: "Confirmed", level: newLevel }
+            : item
+        )
       );
 
       setSuccessMessage(
-        "Interview confirmed and application moved to next level!"
+        `Interview confirmed and application moved to level ${newLevel}!`
       );
 
-      // Clear success message after 5 seconds
       setTimeout(() => {
         setSuccessMessage("");
       }, 5000);
@@ -218,12 +232,18 @@ const AdminInterviewSchedule = () => {
     }
   };
 
-  // Rest of the component remains the same...
-  // Animation variants
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
+  // Toggle between level 1 and level 2 applications
+  const toggleInterviewLevel = () => {
+    setInterviewLevel(interviewLevel === 1 ? 2 : 1);
   };
+
+  // Filter interviews by status
+  const filteredInterviews = interviews.filter((interview) => {
+    if (filterStatus === "all") return true;
+    if (filterStatus === "pending") return interview.status === "Pending";
+    if (filterStatus === "confirmed") return interview.status === "Confirmed";
+    return true;
+  });
 
   // Get interview type icon
   const getInterviewTypeIcon = (type) => {
@@ -262,7 +282,7 @@ const AdminInterviewSchedule = () => {
         theme={theme}
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
-        role="candidate"
+        role="Admin"
       />
 
       {/* Main Content */}
@@ -321,24 +341,69 @@ const AdminInterviewSchedule = () => {
                 </h1>
                 <p className="opacity-90">
                   {interviews.length > 0
-                    ? `You have ${interviews.length} interview${
-                        interviews.length > 1 ? "s" : ""
-                      } to schedule.`
-                    : "No level 1 applications available for scheduling."}
+                    ? `You have ${filteredInterviews.length} interview${
+                        filteredInterviews.length > 1 ? "s" : ""
+                      } to schedule (Level ${interviewLevel}).`
+                    : "No applications available for scheduling."}
                 </p>
               </div>
             </div>
-            <button
-              className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 ${
-                theme === "light"
-                  ? "bg-white text-[#F58634] hover:bg-gray-100"
-                  : "bg-gray-700 text-white hover:bg-gray-600"
-              } transition-all duration-300`}
-            >
-              <span>Interview Tips</span>
-              <FaChevronRight />
-            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={toggleInterviewLevel}
+                className={`px-4 py-3 rounded-lg font-medium flex items-center space-x-2 ${
+                  theme === "light"
+                    ? "bg-white text-[#F58634] hover:bg-gray-100"
+                    : "bg-gray-700 text-white hover:bg-gray-600"
+                } transition-all duration-300`}
+              >
+                <span>Level {interviewLevel === 1 ? 2 : 1} Interviews</span>
+              </button>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-4 py-3 rounded-lg font-medium flex items-center space-x-2 ${
+                  theme === "light"
+                    ? "bg-white text-[#F58634] hover:bg-gray-100"
+                    : "bg-gray-700 text-white hover:bg-gray-600"
+                } transition-all duration-300`}
+              >
+                <FaFilter />
+                <span>Filter</span>
+              </button>
+            </div>
           </div>
+
+          {/* Filter Dropdown */}
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`mt-4 p-4 rounded-lg ${
+                theme === "light" ? "bg-white" : "bg-gray-700"
+              } shadow-md`}
+            >
+              <div className="flex flex-wrap gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className={`p-2 rounded border ${
+                      theme === "light"
+                        ? "bg-white border-gray-300"
+                        : "bg-gray-600 border-gray-500"
+                    }`}
+                  >
+                    <option value="all">All Interviews</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                  </select>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Upcoming Interviews Section */}
@@ -354,7 +419,7 @@ const AdminInterviewSchedule = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold flex items-center">
               <FaCalendarAlt className="mr-2 text-[#F58634]" />
-              Interviews to Schedule
+              {interviewLevel === 1 ? "Initial Interviews" : "Final Interviews"}
             </h2>
             <span
               className={`px-3 py-1 rounded-full text-xs ${
@@ -363,7 +428,8 @@ const AdminInterviewSchedule = () => {
                   : "bg-blue-800 text-blue-100"
               }`}
             >
-              {interviews.length} Pending
+              {filteredInterviews.length}{" "}
+              {filterStatus === "all" ? "Total" : filterStatus}
             </span>
           </div>
 
@@ -378,9 +444,9 @@ const AdminInterviewSchedule = () => {
               ></div>
               <p className="mt-4">Loading applications...</p>
             </div>
-          ) : interviews.length > 0 ? (
+          ) : filteredInterviews.length > 0 ? (
             <div className="space-y-6">
-              {interviews.map((interview, index) => (
+              {filteredInterviews.map((interview, index) => (
                 <motion.div
                   key={interview.id}
                   initial="hidden"
@@ -406,6 +472,60 @@ const AdminInterviewSchedule = () => {
                   } transition-all duration-300`}
                 >
                   <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    {/* Candidate Info Section */}
+                    <div className="flex flex-col">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div
+                          className={`p-3 rounded-full ${
+                            theme === "light" ? "bg-gray-100" : "bg-gray-600"
+                          } text-gray-600`}
+                        >
+                          <FaUserTie size={16} />
+                        </div>
+                        <div>
+                          <h3 className="font-medium">Candidate</h3>
+                          <p
+                            className={
+                              theme === "light"
+                                ? "text-gray-600"
+                                : "text-gray-300"
+                            }
+                          >
+                            {interview.name}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {interview.candidate_email}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div
+                          className={`p-3 rounded-full ${
+                            theme === "light" ? "bg-purple-100" : "bg-gray-600"
+                          } text-purple-500`}
+                        >
+                          <FaBriefcase size={16} />
+                        </div>
+                        <div>
+                          <h3 className="font-medium">Position</h3>
+                          <p
+                            className={
+                              theme === "light"
+                                ? "text-gray-600"
+                                : "text-gray-300"
+                            }
+                          >
+                            {interview.position}
+                          </p>
+                          {interview.jobcode && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              Job Code: {interview.jobcode}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Date and Time Section */}
                     <div className="flex flex-col">
                       <div className="flex items-center space-x-3 mb-3">
@@ -457,30 +577,9 @@ const AdminInterviewSchedule = () => {
                       </div>
                     </div>
 
-                    {/* Position and Type Section */}
+                    {/* Interview Details Section */}
                     <div className="flex flex-col">
                       <div className="flex items-center space-x-3 mb-3">
-                        <div
-                          className={`p-3 rounded-full ${
-                            theme === "light" ? "bg-purple-100" : "bg-gray-600"
-                          } text-purple-500`}
-                        >
-                          <FaBriefcase size={16} />
-                        </div>
-                        <div>
-                          <h3 className="font-medium">Position</h3>
-                          <p
-                            className={
-                              theme === "light"
-                                ? "text-gray-600"
-                                : "text-gray-300"
-                            }
-                          >
-                            {interview.position}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
                         <div
                           className={`p-3 rounded-full ${
                             theme === "light" ? "bg-green-100" : "bg-gray-600"
@@ -498,36 +597,6 @@ const AdminInterviewSchedule = () => {
                             }
                           >
                             {interview.type}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Location and Interviewer */}
-                    <div className="flex flex-col">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <div
-                          className={`p-3 rounded-full ${
-                            theme === "light" ? "bg-red-100" : "bg-gray-600"
-                          } text-red-500`}
-                        >
-                          <FaMapMarkerAlt size={16} />
-                        </div>
-                        <div>
-                          <h3 className="font-medium">Location</h3>
-                          <p
-                            className={
-                              theme === "light"
-                                ? "text-gray-600"
-                                : "text-gray-300"
-                            }
-                          >
-                            {interview.location}
-                            {interview.address && (
-                              <span className="block text-xs mt-1">
-                                {interview.address}
-                              </span>
-                            )}
                           </p>
                         </div>
                       </div>
@@ -580,10 +649,8 @@ const AdminInterviewSchedule = () => {
                               Join Meeting
                             </a>
                           )}
-                          {interview.meeting_id && (
-                            <p className="text-sm">
-                              ID: {interview.meeting_id}
-                            </p>
+                          {interview.location && (
+                            <p className="text-sm">{interview.location}</p>
                           )}
                         </div>
                       )}
@@ -688,16 +755,21 @@ const AdminInterviewSchedule = () => {
               }`}
             >
               <p className="text-gray-500 mb-4">
-                No level 1 applications available for scheduling.
+                No {filterStatus === "all" ? "" : filterStatus} interviews found
+                for level {interviewLevel}.
               </p>
               <button
+                onClick={() => {
+                  setFilterStatus("all");
+                  setInterviewLevel(interviewLevel === 1 ? 2 : 1);
+                }}
                 className={`px-6 py-2 rounded-lg font-medium ${
                   theme === "light"
                     ? "bg-[#F58634] text-white hover:bg-[#e5732a]"
                     : "bg-gray-500 text-white hover:bg-gray-400"
                 } transition-all duration-300`}
               >
-                View Applications
+                View {interviewLevel === 1 ? "Level 2" : "Level 1"} Interviews
               </button>
             </div>
           )}
@@ -768,6 +840,12 @@ const AdminInterviewSchedule = () => {
       </div>
     </div>
   );
+};
+
+// Animation variants
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
 };
 
 export default AdminInterviewSchedule;

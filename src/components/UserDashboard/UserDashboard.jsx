@@ -40,6 +40,7 @@ import Sidebar from "../Sidebar/Sidebar";
 import UserHeader from "../UserHeader/UserHeader";
 import { motion } from "framer-motion";
 import { useTheme } from "../../ThemeContext";
+import { EmailAccount } from "../../Auth";
 
 ChartJS.register(
   CategoryScale,
@@ -57,13 +58,13 @@ const UserDashboard = () => {
   const [application, setApplication] = useState(null);
   const [theme, setTheme] = useState("light");
   const { getemail } = useTheme();
-
+  const emailaccount = EmailAccount();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [candidateEmail, setCandidateEmail] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loggedInEmail = getemail;
+    const loggedInEmail = getemail || emailaccount;
 
     const fetchApplication = async () => {
       try {
@@ -74,7 +75,7 @@ const UserDashboard = () => {
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: `email=${encodeURIComponent("sm634631@gmail.com")}`,
+            body: `email=${encodeURIComponent(emailaccount || getemail)}`,
           }
         );
 
@@ -179,6 +180,8 @@ const UserDashboard = () => {
 
   // Get current level based on status
   const getCurrentLevel = (status) => {
+    // If you're using the level from API, this function might not be needed
+    // But keeping it for backward compatibility
     switch (status) {
       case "Pending":
         return 1;
@@ -457,7 +460,7 @@ const UserDashboard = () => {
                 <div key={step} className="flex flex-col items-center">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      application && getCurrentLevel(application.status) >= step
+                      application && parseInt(application.level) >= step
                         ? "bg-[#F58634] text-white"
                         : theme === "light"
                         ? "bg-gray-200 text-gray-400"
@@ -493,9 +496,7 @@ const UserDashboard = () => {
                 className={`absolute top-0 left-0 h-full rounded-full bg-[#F58634] transition-all duration-1000`}
                 style={{
                   width: `${
-                    application
-                      ? (getCurrentLevel(application.status) / 4) * 100
-                      : 0
+                    application ? (parseInt(application.level) / 4) * 100 : 0
                   }%`,
                 }}
               ></div>

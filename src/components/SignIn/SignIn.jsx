@@ -53,7 +53,9 @@ const SignIn = () => {
       if (data.error === 200) {
         toast.success(data.message || "Login successful.");
         setemaill(email);
+        localStorage.setItem("isLoggedIn", "true");
 
+        localStorage.setItem("emailaccount", JSON.stringify(email));
         const userStatus = data.user?.status;
         if (userStatus === "A") {
           navigate("/Dashboard");

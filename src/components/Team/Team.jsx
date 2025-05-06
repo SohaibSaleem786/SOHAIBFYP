@@ -20,56 +20,56 @@ const TeamsData = [
       "Visionary leader driving innovation and excellence across the organization.",
     image: BlankProfile,
   },
+  // {
+  //   id: 2,
+  //   name: "Muhammad Numan",
+  //   role: "React Developer",
+  //   description:
+  //     "Crafting dynamic and responsive web experiences with precision and creativity.",
+  //   image: Team1,
+  // },
+  // {
+  //   id: 3,
+  //   name: "Saif Khan",
+  //   role: "Flutter Developer",
+  //   description:
+  //     "Building seamless cross-platform mobile apps that users love.",
+  //   image: Team2,
+  // },
   {
     id: 2,
-    name: "Muhammad Numan",
-    role: "React Developer",
-    description:
-      "Crafting dynamic and responsive web experiences with precision and creativity.",
-    image: Team1,
-  },
-  {
-    id: 3,
-    name: "Saif Khan",
-    role: "Flutter Developer",
-    description:
-      "Building seamless cross-platform mobile apps that users love.",
-    image: Team2,
-  },
-  {
-    id: 4,
     name: "Sohaib Saleem",
     role: "React Developer",
     description:
       "Transforming ideas into elegant and functional web solutions.",
     image: Team3,
   },
+  // {
+  //   id: 5,
+  //   name: "Subtain Khan",
+  //   role: "Flutter Developer",
+  //   description:
+  //     "Delivering high-performance mobile apps with clean and efficient code.",
+  //   image: Team4,
+  // },
+  // {
+  //   id: 6,
+  //   name: "Muhammad Hamza",
+  //   role: "React Developer",
+  //   description:
+  //     "Solving complex problems with innovative and scalable web solutions.",
+  //   image: Team6,
+  // },
+  // {
+  //   id: 7,
+  //   name: "Muhammad Umair",
+  //   role: "Flutter Developer",
+  //   description:
+  //     "Passionate about creating intuitive and engaging mobile experiences.",
+  //   image: Team5,
+  // },
   {
-    id: 5,
-    name: "Subtain Khan",
-    role: "Flutter Developer",
-    description:
-      "Delivering high-performance mobile apps with clean and efficient code.",
-    image: Team4,
-  },
-  {
-    id: 6,
-    name: "Muhammad Hamza",
-    role: "React Developer",
-    description:
-      "Solving complex problems with innovative and scalable web solutions.",
-    image: Team6,
-  },
-  {
-    id: 7,
-    name: "Muhammad Umair",
-    role: "Flutter Developer",
-    description:
-      "Passionate about creating intuitive and engaging mobile experiences.",
-    image: Team5,
-  },
-  {
-    id: 8,
+    id: 3,
     name: "Muhammad Abullah",
     role: "Chief Marketing Officer (CMO)",
     description:
@@ -77,7 +77,7 @@ const TeamsData = [
     image: Team9,
   },
   {
-    id: 9,
+    id: 4,
     name: "Raza Ali",
     role: "Project Manager",
     description:
@@ -85,7 +85,7 @@ const TeamsData = [
     image: Team8,
   },
   {
-    id: 10,
+    id: 5,
     name: "Miss Saba",
     role: "HR",
     description:

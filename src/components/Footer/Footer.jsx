@@ -16,7 +16,7 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-14 md:gap-4">
             {/* First Section - About Us */}
             <div className="space-y-4 max-w-[300px]">
-              <h1 className="text-2xl font-bold">CRYSTAL SOLUTIONS</h1>
+              <h1 className="text-2xl font-bold">SMART RECRUITER ASSISTANT</h1>
               <p className="text-dark2">
                 We are a leading software house specializing in custom software
                 development, mobile apps, and web solutions. Our mission is to
