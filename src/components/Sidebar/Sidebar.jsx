@@ -9,6 +9,7 @@ import {
   FaUserTie,
   FaCog,
 } from "react-icons/fa";
+import { FaClipboardList } from "react-icons/fa";
 
 const Sidebar = ({ theme, isSidebarOpen, toggleSidebar, role }) => {
   const isCandidate = role === "candidate";
@@ -87,6 +88,15 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar, role }) => {
               </li>
               <li>
                 <a
+                  href="applications"
+                  className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
+                >
+                  <FaUserPlus />
+                  <span>Total Application</span>
+                </a>
+              </li>
+              <li>
+                <a
                   href="AdminInterviewScheduleScreen"
                   className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
                 >
@@ -96,11 +106,11 @@ const Sidebar = ({ theme, isSidebarOpen, toggleSidebar, role }) => {
               </li>
               <li>
                 <a
-                  href="applications"
+                  href="InterviewEvaluation"
                   className="flex items-center space-x-2 hover:bg-[#e5732a] p-2 rounded transition-all duration-300"
                 >
-                  <FaUserPlus />
-                  <span>Total Application</span>
+                  <FaClipboardList />
+                  <span>Interview Evaluation</span>
                 </a>
               </li>
 

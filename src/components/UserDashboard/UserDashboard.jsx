@@ -62,7 +62,25 @@ const UserDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [candidateEmail, setCandidateEmail] = useState("");
   const [loading, setLoading] = useState(true);
-
+  const [timelineData, setTimelineData] = useState([]);
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Accepted":
+        return "bg-green-100 text-green-800";
+      case "Rejected":
+        return "bg-red-100 text-red-800";
+      case "Pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "Processing":
+        return "bg-blue-100 text-blue-800";
+      case "Interview Scheduled":
+        return "bg-purple-100 text-purple-800";
+      case "Interview Completed":
+        return "bg-orange-100 text-orange-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
   useEffect(() => {
     const loggedInEmail = getemail || emailaccount;
 
@@ -88,6 +106,8 @@ const UserDashboard = () => {
 
         if (data.application) {
           setApplication(data.application);
+          // Generate timeline data based on application status
+          generateTimelineData(data.application);
         } else if (data.error) {
           console.error(data.error);
         }
@@ -102,33 +122,84 @@ const UserDashboard = () => {
     fetchApplication();
   }, []);
 
-  // Status distribution for chart (simplified since we only have one application)
+  const generateTimelineData = (app) => {
+    // Create a timeline based on the current status
+    const statusTimeline = [];
+    const now = new Date();
+
+    // Always has at least "Applied" status
+    statusTimeline.push({
+      date: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
+      status: "Applied",
+      level: 1,
+    });
+
+    // Add other statuses based on current level
+    if (app.level >= 2) {
+      statusTimeline.push({
+        date: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+        status: "Processing",
+        level: 2,
+      });
+    }
+
+    if (app.level >= 3) {
+      statusTimeline.push({
+        date: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+        status: "Under Review",
+        level: 3,
+      });
+    }
+
+    if (
+      app.status === "Interview Scheduled" ||
+      app.status === "Interview Completed"
+    ) {
+      statusTimeline.push({
+        date: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+        status: "Interview Scheduled",
+        level: 4,
+      });
+    }
+
+    if (app.status === "Interview Completed") {
+      statusTimeline.push({
+        date: new Date(),
+        status: "Interview Completed",
+        level: 4,
+      });
+    }
+
+    if (app.status === "Accepted" || app.status === "Rejected") {
+      statusTimeline.push({
+        date: new Date(),
+        status: app.status,
+        level: 4,
+      });
+    }
+
+    setTimelineData(statusTimeline);
+  };
+
+  // Status distribution for chart (showing current status)
   const statusDistributionData = {
-    labels: [
-      "Pending",
-      "Processing",
-      "Accepted",
-      "Rejected",
-      "Interview Scheduled",
-      "Interview Completed",
-    ],
+    labels: ["Current Status", "Other Statuses"],
     datasets: [
       {
-        data: [
-          application?.status === "Pending" ? 1 : 0,
-          application?.status === "Processing" ? 1 : 0,
-          application?.status === "Accepted" ? 1 : 0,
-          application?.status === "Rejected" ? 1 : 0,
-          application?.status === "Interview Scheduled" ? 1 : 0,
-          application?.status === "Interview Completed" ? 1 : 0,
-        ],
+        data: [1, 5], // Highlighting the current status
         backgroundColor: [
-          "#FFCE56", // Pending - yellow
-          "#36A2EB", // Processing - blue
-          "#4BC0C0", // Accepted - teal
-          "#FF6384", // Rejected - red
-          "#9966FF", // Interview Scheduled - purple
-          "#FF9F40", // Interview Completed - orange
+          getStatusColor(application?.status).includes("green")
+            ? "#4BC0C0"
+            : getStatusColor(application?.status).includes("red")
+            ? "#FF6384"
+            : getStatusColor(application?.status).includes("yellow")
+            ? "#FFCE56"
+            : getStatusColor(application?.status).includes("blue")
+            ? "#36A2EB"
+            : getStatusColor(application?.status).includes("purple")
+            ? "#9966FF"
+            : "#4BC0C0", // Default to teal
+          theme === "light" ? "#E5E7EB" : "#4B5563",
         ],
         borderColor: theme === "light" ? "#fff" : "#1F2937",
         borderWidth: 2,
@@ -136,17 +207,38 @@ const UserDashboard = () => {
     ],
   };
 
-  // Application timeline data (mock data)
+  // Application timeline data based on actual status changes
   const applicationTimelineData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    labels: timelineData.map((item, index) =>
+      index === timelineData.length - 1
+        ? "Now"
+        : `${Math.abs(
+            Math.round((new Date() - item.date) / (1000 * 60 * 60 * 24))
+          )}d ago`
+    ),
     datasets: [
       {
-        label: "Applications",
-        data: [0, 0, 0, 1, 0, 0], // Assuming one application in April
+        label: "Progress Level",
+        data: timelineData.map((item) => item.level),
         borderColor: "#F58634",
         backgroundColor: "rgba(245, 134, 52, 0.2)",
         tension: 0.3,
         fill: true,
+        pointBackgroundColor: timelineData.map((item) =>
+          item.status === "Accepted"
+            ? "#4BC0C0"
+            : item.status === "Rejected"
+            ? "#FF6384"
+            : item.status === "Pending"
+            ? "#FFCE56"
+            : item.status === "Processing"
+            ? "#36A2EB"
+            : item.status === "Interview Scheduled"
+            ? "#9966FF"
+            : "#F58634"
+        ),
+        pointRadius: 6,
+        pointHoverRadius: 8,
       },
     ],
   };
@@ -166,6 +258,22 @@ const UserDashboard = () => {
       },
     },
     maintainAspectRatio: false,
+    scales: {
+      y: {
+        min: 0,
+        max: 4,
+        ticks: {
+          stepSize: 1,
+          callback: function (value) {
+            if (value === 1) return "Applied";
+            if (value === 2) return "Processing";
+            if (value === 3) return "Under Review";
+            if (value === 4) return "Interview";
+            return "";
+          },
+        },
+      },
+    },
   };
 
   // Toggle theme
@@ -180,45 +288,24 @@ const UserDashboard = () => {
 
   // Get current level based on status
   const getCurrentLevel = (status) => {
-    // If you're using the level from API, this function might not be needed
-    // But keeping it for backward compatibility
     switch (status) {
       case "Pending":
         return 1;
       case "Processing":
-        return 1;
-      case "Accepted":
         return 2;
+      case "Accepted":
+      case "Rejected":
+        return 4;
       case "Interview Scheduled":
         return 3;
       case "Interview Completed":
         return 4;
-      case "Rejected":
-        return 0;
       default:
         return 1;
     }
   };
 
   // Get status color
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Accepted":
-        return "bg-green-100 text-green-800";
-      case "Rejected":
-        return "bg-red-100 text-red-800";
-      case "Pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "Processing":
-        return "bg-blue-100 text-blue-800";
-      case "Interview Scheduled":
-        return "bg-purple-100 text-purple-800";
-      case "Interview Completed":
-        return "bg-orange-100 text-orange-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
 
   // Get status icon
   const getStatusIcon = (status) => {
@@ -298,7 +385,9 @@ const UserDashboard = () => {
                 </h1>
                 <p className="opacity-90">
                   {application
-                    ? `You have an active application for ${application.category}.`
+                    ? `Your application for ${
+                        application.category
+                      } is currently ${application.status.toLowerCase()}.`
                     : "Start your job search by applying to exciting opportunities."}
                 </p>
               </div>
@@ -337,9 +426,7 @@ const UserDashboard = () => {
             },
             {
               title: "Current Level",
-              value: application
-                ? `Level ${getCurrentLevel(application.status)}`
-                : "Level 0",
+              value: application ? `Level ${application.level}` : "Level 0",
               icon: <FaChartLine size={20} />,
               color: "text-green-500",
               bg: "bg-green-50",
@@ -400,17 +487,45 @@ const UserDashboard = () => {
             }`}
           >
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Application Status</h2>
+              <h2 className="text-lg font-semibold">Your Application Status</h2>
               <span
                 className={`text-xs px-3 py-1 rounded-full ${
                   theme === "light" ? "bg-gray-100" : "bg-gray-600"
                 }`}
               >
-                Overview
+                Current Status
               </span>
             </div>
-            <div className="h-64">
-              <Doughnut data={statusDistributionData} options={chartOptions} />
+            <div className="h-64 flex flex-col items-center justify-center">
+              <div className="w-40 h-40 mb-4">
+                <Doughnut
+                  data={statusDistributionData}
+                  options={{
+                    ...chartOptions,
+                    plugins: {
+                      legend: {
+                        display: false,
+                      },
+                      tooltip: {
+                        callbacks: {
+                          label: function (context) {
+                            return context.label === "Current Status"
+                              ? application?.status
+                              : "Other possible statuses";
+                          },
+                        },
+                      },
+                    },
+                  }}
+                />
+              </div>
+              <div
+                className={`text-lg font-semibold px-4 py-2 rounded-full ${getStatusColor(
+                  application?.status
+                )}`}
+              >
+                {application?.status || "No Application"}
+              </div>
             </div>
           </motion.div>
 
@@ -425,17 +540,34 @@ const UserDashboard = () => {
             }`}
           >
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Your Activity</h2>
+              <h2 className="text-lg font-semibold">
+                Your Application Journey
+              </h2>
               <span
                 className={`text-xs px-3 py-1 rounded-full ${
                   theme === "light" ? "bg-gray-100" : "bg-gray-600"
                 }`}
               >
-                Last 6 Months
+                Progress Timeline
               </span>
             </div>
             <div className="h-64">
-              <Line data={applicationTimelineData} options={chartOptions} />
+              <Line
+                data={applicationTimelineData}
+                options={{
+                  ...chartOptions,
+                  plugins: {
+                    tooltip: {
+                      callbacks: {
+                        label: function (context) {
+                          const dataIndex = context.dataIndex;
+                          return timelineData[dataIndex]?.status || "";
+                        },
+                      },
+                    },
+                  },
+                }}
+              />
             </div>
           </motion.div>
         </div>
@@ -477,9 +609,9 @@ const UserDashboard = () => {
                     {step === 1
                       ? "Applied"
                       : step === 2
-                      ? "Under Review"
+                      ? "Processing"
                       : step === 3
-                      ? "Interview"
+                      ? "Under Review"
                       : "Decision"}
                   </span>
                 </div>
@@ -523,10 +655,7 @@ const UserDashboard = () => {
                     {getStatusIcon(application.status)}
                   </div>
                   <div>
-                    <h3 className="font-semibold">
-                      {application.jobcode ? `${application.jobcode} - ` : ""}
-                      {application.category}
-                    </h3>
+                    <h3 className="font-semibold">{application.category}</h3>
                     <div className="flex items-center space-x-2 mt-1">
                       <span
                         className={`text-xs px-2 py-1 rounded-full ${getStatusColor(
@@ -542,7 +671,7 @@ const UserDashboard = () => {
                             : "bg-gray-600 text-gray-100"
                         }`}
                       >
-                        Level {getCurrentLevel(application.status)}
+                        Level {application.level}
                       </span>
                     </div>
                   </div>
@@ -568,9 +697,8 @@ const UserDashboard = () => {
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500">Applied On</p>
-                    <p>April 2023</p>{" "}
-                    {/* You might want to add application date to your API */}
+                    <p className="text-sm text-gray-500">Applicant Name</p>
+                    <p>{application.name}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Position</p>
@@ -582,7 +710,7 @@ const UserDashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Progress Level</p>
-                    <p>Level {getCurrentLevel(application.status)} of 4</p>
+                    <p>Level {application.level} of 4</p>
                   </div>
                 </div>
               </div>
@@ -613,68 +741,191 @@ const UserDashboard = () => {
           )}
         </motion.div>
 
-        {/* Tips Section */}
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={cardVariants}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className={`p-6 rounded-xl shadow-md ${
-            theme === "light" ? "bg-white" : "bg-gray-700"
-          }`}
-        >
-          <h2 className="text-lg font-semibold mb-4">Job Search Tips</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div
-              className={`p-4 rounded-lg ${
-                theme === "light" ? "bg-blue-50" : "bg-gray-600"
-              }`}
-            >
-              <h3 className="font-medium mb-2 flex items-center">
-                <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center mr-2">
-                  1
-                </span>
-                Tailor Your Resume
-              </h3>
-              <p className="text-sm text-gray-500">
-                Customize your resume for each job application to highlight
-                relevant skills.
-              </p>
+        {/* Tips Section based on current status */}
+        {application && (
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={cardVariants}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className={`p-6 rounded-xl shadow-md ${
+              theme === "light" ? "bg-white" : "bg-gray-700"
+            }`}
+          >
+            <h2 className="text-lg font-semibold mb-4">
+              {application.status === "Pending" &&
+                "What to Expect While Your Application is Pending"}
+              {application.status === "Processing" &&
+                "Next Steps in the Hiring Process"}
+              {application.status === "Interview Scheduled" &&
+                "Preparing for Your Interview"}
+              {application.status === "Accepted" &&
+                "Congratulations on Your Acceptance!"}
+              {application.status === "Rejected" &&
+                "Feedback on Your Application"}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {application.status === "Pending" && (
+                <>
+                  <div
+                    className={`p-4 rounded-lg ${
+                      theme === "light" ? "bg-blue-50" : "bg-gray-600"
+                    }`}
+                  >
+                    <h3 className="font-medium mb-2 flex items-center">
+                      <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center mr-2">
+                        1
+                      </span>
+                      Typical Review Time
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Most applications are reviewed within 5-7 business days.
+                      We appreciate your patience.
+                    </p>
+                  </div>
+                  <div
+                    className={`p-4 rounded-lg ${
+                      theme === "light" ? "bg-purple-50" : "bg-gray-600"
+                    }`}
+                  >
+                    <h3 className="font-medium mb-2 flex items-center">
+                      <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center mr-2">
+                        2
+                      </span>
+                      Status Updates
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      You'll receive email notifications when your application
+                      status changes.
+                    </p>
+                  </div>
+                  <div
+                    className={`p-4 rounded-lg ${
+                      theme === "light" ? "bg-green-50" : "bg-gray-600"
+                    }`}
+                  >
+                    <h3 className="font-medium mb-2 flex items-center">
+                      <span className="w-6 h-6 rounded-full bg-green-100 text-green-800 flex items-center justify-center mr-2">
+                        3
+                      </span>
+                      While You Wait
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Consider preparing for potential next steps like
+                      interviews or assessments.
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {application.status === "Processing" && (
+                <>
+                  <div
+                    className={`p-4 rounded-lg ${
+                      theme === "light" ? "bg-blue-50" : "bg-gray-600"
+                    }`}
+                  >
+                    <h3 className="font-medium mb-2 flex items-center">
+                      <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center mr-2">
+                        1
+                      </span>
+                      Current Stage
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Your application is being reviewed by our hiring team for
+                      initial screening.
+                    </p>
+                  </div>
+                  <div
+                    className={`p-4 rounded-lg ${
+                      theme === "light" ? "bg-purple-50" : "bg-gray-600"
+                    }`}
+                  >
+                    <h3 className="font-medium mb-2 flex items-center">
+                      <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center mr-2">
+                        2
+                      </span>
+                      Possible Next Steps
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      If selected, you may be contacted for an interview or
+                      additional assessments.
+                    </p>
+                  </div>
+                  <div
+                    className={`p-4 rounded-lg ${
+                      theme === "light" ? "bg-green-50" : "bg-gray-600"
+                    }`}
+                  >
+                    <h3 className="font-medium mb-2 flex items-center">
+                      <span className="w-6 h-6 rounded-full bg-green-100 text-green-800 flex items-center justify-center mr-2">
+                        3
+                      </span>
+                      Timeline
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      This stage typically takes 3-5 business days. You'll be
+                      notified of any updates.
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {application.status === "Interview Scheduled" && (
+                <>
+                  <div
+                    className={`p-4 rounded-lg ${
+                      theme === "light" ? "bg-blue-50" : "bg-gray-600"
+                    }`}
+                  >
+                    <h3 className="font-medium mb-2 flex items-center">
+                      <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center mr-2">
+                        1
+                      </span>
+                      Interview Preparation
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Research the company and review the job description.
+                      Prepare examples of your work.
+                    </p>
+                  </div>
+                  <div
+                    className={`p-4 rounded-lg ${
+                      theme === "light" ? "bg-purple-50" : "bg-gray-600"
+                    }`}
+                  >
+                    <h3 className="font-medium mb-2 flex items-center">
+                      <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center mr-2">
+                        2
+                      </span>
+                      Technical Preparation
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Review technical concepts relevant to the position. Be
+                      ready to discuss your experience.
+                    </p>
+                  </div>
+                  <div
+                    className={`p-4 rounded-lg ${
+                      theme === "light" ? "bg-green-50" : "bg-gray-600"
+                    }`}
+                  >
+                    <h3 className="font-medium mb-2 flex items-center">
+                      <span className="w-6 h-6 rounded-full bg-green-100 text-green-800 flex items-center justify-center mr-2">
+                        3
+                      </span>
+                      Day of Interview
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Test your technology beforehand, dress professionally, and
+                      join the call early.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
-            <div
-              className={`p-4 rounded-lg ${
-                theme === "light" ? "bg-purple-50" : "bg-gray-600"
-              }`}
-            >
-              <h3 className="font-medium mb-2 flex items-center">
-                <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center mr-2">
-                  2
-                </span>
-                Follow Up
-              </h3>
-              <p className="text-sm text-gray-500">
-                Send a thank-you email after interviews and follow up if you
-                haven't heard back.
-              </p>
-            </div>
-            <div
-              className={`p-4 rounded-lg ${
-                theme === "light" ? "bg-green-50" : "bg-gray-600"
-              }`}
-            >
-              <h3 className="font-medium mb-2 flex items-center">
-                <span className="w-6 h-6 rounded-full bg-green-100 text-green-800 flex items-center justify-center mr-2">
-                  3
-                </span>
-                Build Network
-              </h3>
-              <p className="text-sm text-gray-500">
-                Connect with professionals in your field to discover new
-                opportunities.
-              </p>
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

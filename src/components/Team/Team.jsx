@@ -15,7 +15,7 @@ const TeamsData = [
   {
     id: 1,
     name: "...",
-    role: "CEO",
+    role: "Admin",
     description:
       "Visionary leader driving innovation and excellence across the organization.",
     image: BlankProfile,

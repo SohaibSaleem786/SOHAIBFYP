@@ -1,6 +1,7 @@
 import React from "react";
-import { FaInstagram, FaWhatsapp, FaYoutube } from "react-icons/fa";
-import { TbWorldWww } from "react-icons/tb";
+import { FaLinkedin, FaWhatsapp, FaTwitter, FaEnvelope } from "react-icons/fa";
+import { HiOfficeBuilding } from "react-icons/hi";
+import { MdOutlineWorkOutline, MdEmail, MdPhone } from "react-icons/md";
 import { motion } from "framer-motion";
 import Chatbot from "./Chatbot";
 
@@ -11,116 +12,178 @@ const Footer = () => {
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
           className="container"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-14 md:gap-4">
-            {/* First Section - About Us */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-14 md:gap-8">
+            {/* First Section - About Recruitment */}
             <div className="space-y-4 max-w-[300px]">
-              <h1 className="text-2xl font-bold">SMART RECRUITER ASSISTANT</h1>
+              <h1 className="text-2xl font-bold text-[#f58634]">
+                SMART RECRUITER ASSISTANT
+              </h1>
               <p className="text-dark2">
-                We are a leading software house specializing in custom software
-                development, mobile apps, and web solutions. Our mission is to
-                deliver innovative, scalable, and user-friendly solutions that
-                drive business growth and success.
+                Our AI-powered recruitment platform streamlines hiring
+                processes, connects top talent with employers, and provides
+                real-time application tracking for candidates and recruiters
+                alike.
               </p>
-            </div>
 
-            {/* Second Section - Quick Links */}
-            <div className="grid grid-cols-2 gap-10">
-              {/* Services */}
-              <div className="space-y-4">
-                <h1 className="text-2xl font-bold">Services</h1>
-                <div className="text-dark2">
-                  <ul className="space-y-2 text-lg">
-                    <li className="cursor-pointer hover:text-secondary duration-200">
-                      Custom Software
-                    </li>
-                    <li className="cursor-pointer hover:text-secondary duration-200">
-                      Mobile App Development
-                    </li>
-                    <li className="cursor-pointer hover:text-secondary duration-200">
-                      Web Development
-                    </li>
-                    <li className="cursor-pointer hover:text-secondary duration-200">
-                      UI/UX Design
-                    </li>
-                  </ul>
+              {/* Trust Indicators */}
+              <div className="pt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <MdOutlineWorkOutline className="text-[#f58634] text-xl" />
+                  <span className="font-medium">500+ Jobs Posted Monthly</span>
                 </div>
-              </div>
-
-              {/* Quick Links */}
-              <div className="space-y-4">
-                <h1 className="text-2xl font-bold">Quick Links</h1>
-                <div className="text-dark2">
-                  <ul className="space-y-2 text-lg">
-                    <li className="cursor-pointer hover:text-secondary duration-200">
-                      Home
-                    </li>
-                    <li className="cursor-pointer hover:text-secondary duration-200">
-                      About Us
-                    </li>
-                    <li className="cursor-pointer hover:text-secondary duration-200">
-                      Portfolio
-                    </li>
-                    <li className="cursor-pointer hover:text-secondary duration-200">
-                      Contact Us
-                    </li>
-                  </ul>
+                <div className="flex items-center gap-2">
+                  <HiOfficeBuilding className="text-[#f58634] text-xl" />
+                  <span className="font-medium">200+ Partner Companies</span>
                 </div>
               </div>
             </div>
 
-            {/* Third Section - Get In Touch */}
-            <div className="space-y-4 max-w-[300px]">
-              <h1 className="text-2xl font-bold">Get In Touch</h1>
-              <p className="text-dark2">
-                Fill in the form to start a conversation.
-              </p>
+            {/* Second Section - For Candidates */}
+            <div className="space-y-4">
+              <h1 className="text-2xl font-bold text-[#f58634]">
+                For Candidates
+              </h1>
+              <div className="text-dark2">
+                <ul className="space-y-3 text-lg">
+                  <li className="flex items-center gap-2 cursor-pointer hover:text-[#f58634] duration-200">
+                    <span className="w-2 h-2 bg-[#f58634] rounded-full"></span>
+                    <span>Browse Jobs</span>
+                  </li>
+                  <li className="flex items-center gap-2 cursor-pointer hover:text-[#f58634] duration-200">
+                    <span className="w-2 h-2 bg-[#f58634] rounded-full"></span>
+                    <span>Application Dashboard</span>
+                  </li>
+                  <li className="flex items-center gap-2 cursor-pointer hover:text-[#f58634] duration-200">
+                    <span className="w-2 h-2 bg-[#f58634] rounded-full"></span>
+                    <span>Resume Builder</span>
+                  </li>
+                  <li className="flex items-center gap-2 cursor-pointer hover:text-[#f58634] duration-200">
+                    <span className="w-2 h-2 bg-[#f58634] rounded-full"></span>
+                    <span>Interview Preparation</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
 
-              {/* Email Subscription */}
-              <div className="flex items-center">
-                <input
-                  type="text"
-                  placeholder="Enter your email"
-                  className="p-3 rounded-s-xl bg-white w-full py-4 focus:ring-0 focus:outline-none placeholder:text-dark2"
-                />
-                <button
-                  className="bg-primary text-white font-semibold py-4 px-6 rounded-e-xl"
-                  style={{ backgroundColor: "#f58634" }}
-                >
-                  Subscribe
-                </button>
+            {/* Third Section - For Employers */}
+            <div className="space-y-4">
+              <h1 className="text-2xl font-bold text-[#f58634]">
+                For Employers
+              </h1>
+              <div className="text-dark2">
+                <ul className="space-y-3 text-lg">
+                  <li className="flex items-center gap-2 cursor-pointer hover:text-[#f58634] duration-200">
+                    <span className="w-2 h-2 bg-[#f58634] rounded-full"></span>
+                    <span>Post Jobs</span>
+                  </li>
+                  <li className="flex items-center gap-2 cursor-pointer hover:text-[#f58634] duration-200">
+                    <span className="w-2 h-2 bg-[#f58634] rounded-full"></span>
+                    <span>Browse Candidates</span>
+                  </li>
+                  <li className="flex items-center gap-2 cursor-pointer hover:text-[#f58634] duration-200">
+                    <span className="w-2 h-2 bg-[#f58634] rounded-full"></span>
+                    <span>AI Resume Screening</span>
+                  </li>
+                  <li className="flex items-center gap-2 cursor-pointer hover:text-[#f58634] duration-200">
+                    <span className="w-2 h-2 bg-[#f58634] rounded-full"></span>
+                    <span>Interview Scheduling</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Fourth Section - Contact */}
+            <div className="space-y-4 max-w-[300px]">
+              <h1 className="text-2xl font-bold text-[#f58634]">Contact Us</h1>
+
+              {/* Newsletter Subscription */}
+              <div>
+                <p className="text-dark2 mb-3">
+                  Subscribe to our newsletter for recruitment tips and job
+                  alerts.
+                </p>
+                <div className="flex items-center">
+                  <input
+                    type="email"
+                    placeholder="Your email"
+                    className="p-3 rounded-s-lg bg-white w-full py-3 focus:ring-0 focus:outline-none border border-gray-300 placeholder:text-dark2"
+                  />
+                  <button className="bg-[#f58634] text-white font-semibold py-3 px-4 rounded-e-lg hover:bg-[#e07a2f] transition-colors">
+                    Subscribe
+                  </button>
+                </div>
               </div>
 
               {/* Contact Details */}
-              <div className="space-y-2 text-dark2">
-                <p>House No 15 D Al-Makkah Colony,</p>
-                <p>College Road Near Butt Chowk,</p>
-                <p>Lahore</p>
-                <p>0304-4770075</p>
-                <p>crystalsolutions.com</p>
+              <div className="space-y-3 pt-4 text-dark2">
+                <div className="flex items-center gap-3">
+                  <MdEmail className="text-[#f58634] text-xl" />
+                  <span>contact@smartrecruiter.com</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <MdPhone className="text-[#f58634] text-xl" />
+                  <span>+1 (555) 123-4567</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <HiOfficeBuilding className="text-[#f58634] text-xl" />
+                  <span>123 Recruitment Ave, Tech City, TC 10001</span>
+                </div>
               </div>
 
               {/* Social Icons */}
-              <div className="flex space-x-6 py-3">
-                <a href="https://wa.me/03044770075">
-                  <FaWhatsapp className="cursor-pointer hover:text-primary hover:scale-105 duration-200" />
+              <div className="flex space-x-4 pt-4">
+                <a
+                  href="#"
+                  className="text-gray-600 hover:text-[#f58634] transition-colors"
+                >
+                  <FaLinkedin className="text-xl" />
                 </a>
-                <a href="https://www.instagram.com/crystalsolutions">
-                  <FaInstagram className="cursor-pointer hover:text-primary hover:scale-105 duration-200" />
+                <a
+                  href="#"
+                  className="text-gray-600 hover:text-[#f58634] transition-colors"
+                >
+                  <FaTwitter className="text-xl" />
                 </a>
-                <a href="https://crystalsolutions.com">
-                  <TbWorldWww className="cursor-pointer hover:text-primary hover:scale-105 duration-200" />
+                <a
+                  href="#"
+                  className="text-gray-600 hover:text-[#f58634] transition-colors"
+                >
+                  <FaWhatsapp className="text-xl" />
                 </a>
-                <a href="https://www.youtube.com/crystalsolutions">
-                  <FaYoutube className="cursor-pointer hover:text-primary hover:scale-105 duration-200" />
+                <a
+                  href="#"
+                  className="text-gray-600 hover:text-[#f58634] transition-colors"
+                >
+                  <FaEnvelope className="text-xl" />
                 </a>
               </div>
             </div>
           </div>
+
+          {/* Copyright */}
+          <div className="border-t border-gray-200 mt-16 pt-8 text-center text-dark2">
+            <p>
+              © {new Date().getFullYear()} Smart Recruiter Assistant. All rights
+              reserved.
+            </p>
+            <div className="flex justify-center gap-4 mt-2 text-sm">
+              <a href="#" className="hover:text-[#f58634]">
+                Privacy Policy
+              </a>
+              <a href="#" className="hover:text-[#f58634]">
+                Terms of Service
+              </a>
+              <a href="#" className="hover:text-[#f58634]">
+                Cookie Policy
+              </a>
+            </div>
+          </div>
         </motion.div>
       </footer>
-      {/* <Chatbot /> */}
+      <Chatbot />
     </section>
   );
 };

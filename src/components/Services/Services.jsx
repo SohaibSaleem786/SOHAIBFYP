@@ -1,122 +1,100 @@
 import React from "react";
-import { RiComputerLine } from "react-icons/ri";
-import { CiMobile3 } from "react-icons/ci";
-import { TbWorldWww } from "react-icons/tb";
-import { IoMdHappy } from "react-icons/io";
-import { BiSupport } from "react-icons/bi";
-import { IoPulseOutline } from "react-icons/io5";
+import { RiUserSearchLine } from "react-icons/ri";
+import { MdOutlineWorkOutline, MdOutlineEmail } from "react-icons/md";
+import { TbDashboard } from "react-icons/tb";
+import { AiOutlineSchedule } from "react-icons/ai";
+import { BsFileText, BsChatLeftText } from "react-icons/bs";
+import { FiMail, FiUserCheck, FiUserX } from "react-icons/fi";
 import { motion, useAnimation } from "framer-motion";
 
 const ServicesData = [
   {
     id: 1,
-    title: "Web Development",
-    link: "#",
-    icon: <TbWorldWww />,
+    title: "Job Search & Application",
+    icon: <MdOutlineWorkOutline />,
     description:
-      "We create stunning and responsive websites tailored to your business needs.",
+      "Users can search and apply for jobs through our platform with ease.",
   },
   {
     id: 2,
-    title: "Mobile Development",
-    link: "#",
-    icon: <CiMobile3 />,
+    title: "Automated Account Creation",
+    icon: <MdOutlineEmail />,
     description:
-      "We build high-performance mobile apps for iOS and Android platforms.",
+      "Instant email with login credentials sent upon successful application.",
   },
   {
     id: 3,
-    title: "Software Development",
-    link: "#",
-    icon: <RiComputerLine />,
+    title: "Application Dashboard",
+    icon: <TbDashboard />,
     description:
-      "We develop custom software solutions to streamline your business operations.",
+      "Real-time tracking of application status (pending, under review, interview).",
   },
   {
     id: 4,
-    title: "Satisfied Clients",
-    link: "#",
-    icon: <IoMdHappy />,
+    title: "Status Notifications",
+    icon: <FiMail />,
     description:
-      "Our clients trust us for delivering exceptional results and outstanding service.",
+      "Email notifications for every status update (rejected, pending, accepted).",
   },
   {
     id: 5,
-    title: "SEO Optimization",
-    link: "#",
-    icon: <IoPulseOutline />,
+    title: "Admin Management",
+    icon: <RiUserSearchLine />,
     description:
-      "We optimize your website to rank higher on search engines and drive more traffic.",
+      "Admin portal to view, accept or reject candidate applications.",
   },
   {
     id: 6,
-    title: "24/7 Support",
-    link: "#",
-    icon: <BiSupport />,
+    title: "Resume Analysis",
+    icon: <BsFileText />,
     description:
-      "We provide round-the-clock support to ensure your systems run smoothly.",
+      "Admin can review and analyze candidate resumes with summary generation.",
   },
   {
     id: 7,
-    title: "Installment Software",
-    link: "#",
-    icon: <RiComputerLine />, // You can use a different icon if available
+    title: "Interview Scheduling",
+    icon: <AiOutlineSchedule />,
     description:
-      "We offer flexible installment software solutions to help you manage payments efficiently.",
+      "Easily schedule interviews with qualified candidates through the platform.",
   },
   {
     id: 8,
-    title: "Web Development",
-    link: "#",
-    icon: <TbWorldWww />,
-    description:
-      "We create stunning and responsive websites tailored to your business needs.",
+    title: "Application Approval",
+    icon: <FiUserCheck />,
+    description: "Admin can approve applications and move candidates forward.",
   },
   {
     id: 9,
-    title: "Mobile Development",
-    link: "#",
-    icon: <CiMobile3 />,
-    description:
-      "We build high-performance mobile apps for iOS and Android platforms.",
+    title: "Application Rejection",
+    icon: <FiUserX />,
+    description: "Admin can reject applications with optional feedback.",
   },
   {
     id: 10,
-    title: "Software Development",
-    link: "#",
-    icon: <RiComputerLine />,
+    title: "Chatbot Support",
+    icon: <BsChatLeftText />,
     description:
-      "We develop custom software solutions to streamline your business operations.",
-  },
-  {
-    id: 11,
-    title: "Satisfied Clients",
-    link: "#",
-    icon: <IoMdHappy />,
-    description:
-      "Our clients trust us for delivering exceptional results and outstanding service.",
+      "AI chatbot to answer candidate queries and forward to recruitment team.",
   },
 ];
 
 const Services = () => {
   const controls = useAnimation();
 
-  // Function to create a continuous left-to-right animation
   const startAnimation = async () => {
     while (true) {
       await controls.start({
-        x: [0, -1000], // Move from left to right
+        x: [0, -1000],
         transition: {
-          duration: 20, // Adjust speed here
+          duration: 20,
           ease: "linear",
-          repeat: Infinity, // Loop infinitely
+          repeat: Infinity,
           repeatType: "loop",
         },
       });
     }
   };
 
-  // Start the animation when the component mounts
   React.useEffect(() => {
     startAnimation();
   }, []);
@@ -128,28 +106,22 @@ const Services = () => {
           className="text-4xl font-bold text-left pb-10"
           style={{ color: "#f58634" }}
         >
-          Services we provide
+          Our Recruitment Services
         </h1>
 
-        {/* Service Cards Row */}
         <div className="overflow-hidden">
-          {" "}
-          {/* Added overflow-hidden to prevent hover overflow */}
           <motion.div animate={controls} className="flex gap-8 w-min">
             {ServicesData.map((service) => (
               <div
                 key={service.id}
-                className="bg-[#f4f4f4] rounded-2xl flex flex-col gap-4 items-center justify-center p-4 py-7 hover:bg-white hover:scale-110 duration-300 hover:shadow-2xl min-w-[200px] border-2 border-[#F58634] overflow-hidden" // Added overflow-hidden
+                className="bg-[#f4f4f4] rounded-2xl flex flex-col gap-4 items-center justify-center p-4 py-7 hover:bg-white hover:scale-110 duration-300 hover:shadow-2xl min-w-[200px] border-2 border-[#F58634] overflow-hidden"
               >
-                {/* Service Icon */}
-                <div className="text-4xl mb-4">{service.icon}</div>
-
-                {/* Service Title */}
+                <div className="text-4xl mb-4" style={{ color: "#f58634" }}>
+                  {service.icon}
+                </div>
                 <h1 className="text-lg font-semibold text-center px-3">
                   {service.title}
                 </h1>
-
-                {/* Service Description */}
                 <p className="text-sm text-gray-600 text-center px-2">
                   {service.description}
                 </p>

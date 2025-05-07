@@ -11,8 +11,8 @@ import {
   FaUser,
   FaBars,
   FaFilePdf,
-  FaBriefcase, // For New Jobs
-  FaUserTie, // For Candidate
+  FaBriefcase,
+  FaUserTie,
 } from "react-icons/fa";
 import { Line, Bar } from "react-chartjs-2";
 import {
@@ -28,6 +28,7 @@ import {
 } from "chart.js";
 import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -41,8 +42,8 @@ ChartJS.register(
 
 const Dashboard = () => {
   const [applicants, setApplicants] = useState([]);
-  const [theme, setTheme] = useState("light"); // Default theme is light
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar state
+  const [theme, setTheme] = useState("light");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Fetch applicants from the API
   useEffect(() => {
@@ -80,7 +81,6 @@ const Dashboard = () => {
       );
       const data = await response.json();
       if (data.message) {
-        // Refresh the list of applicants
         const updatedApplicants = applicants.map((applicant) =>
           applicant.id === id ? { ...applicant, status } : applicant
         );
@@ -93,51 +93,111 @@ const Dashboard = () => {
     }
   };
 
-  // Separate accepted and rejected applicants
+  // Filter applicants by status
   const acceptedApplicants = applicants.filter(
     (applicant) => applicant.status === "Accepted"
   );
   const rejectedApplicants = applicants.filter(
     (applicant) => applicant.status === "Rejected"
   );
+  const processingApplicants = applicants.filter(
+    (applicant) => applicant.status === "Processing"
+  );
 
   // Get the last accepted and rejected applicants
   const lastAccepted = acceptedApplicants[acceptedApplicants.length - 1];
   const lastRejected = rejectedApplicants[rejectedApplicants.length - 1];
 
-  // Sample data for charts
-  const hiringTrendsData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [
-      {
-        label: "Hires",
-        data: [5, 10, 8, 12, 15, 20],
-        borderColor: "#F58634",
-        backgroundColor: "rgba(245, 134, 52, 0.2)",
-      },
-    ],
+  // Prepare chart data based on real applicant data
+  const getHiringTrendsData = () => {
+    // Group applicants by month
+    const monthlyCounts = applicants.reduce((acc, applicant) => {
+      // Assuming you have an application_date field in your data
+      // If not, you might need to modify this part
+      const date = new Date(/* applicant.application_date or similar */);
+      const month = date.toLocaleString("default", { month: "short" });
+      acc[month] = (acc[month] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Fallback if no date data is available
+    if (Object.keys(monthlyCounts).length === 0) {
+      return {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        datasets: [
+          {
+            label: "Applications",
+            data: [applicants.length, 0, 0, 0, 0, 0], // Just show total in first month
+            borderColor: "#F58634",
+            backgroundColor: "rgba(245, 134, 52, 0.2)",
+          },
+        ],
+      };
+    }
+
+    return {
+      labels: Object.keys(monthlyCounts),
+      datasets: [
+        {
+          label: "Applications",
+          data: Object.values(monthlyCounts),
+          borderColor: "#F58634",
+          backgroundColor: "rgba(245, 134, 52, 0.2)",
+        },
+      ],
+    };
   };
 
-  const employeeDistributionData = {
-    labels: ["Developers", "Designers", "QA", "Managers"],
-    datasets: [
-      {
-        label: "Employees",
-        data: [40, 15, 10, 5],
-        backgroundColor: "#F58634",
-      },
-    ],
+  const getEmployeeDistributionData = () => {
+    // Group applicants by category (IT, Frontend Developer, etc.)
+    const categoryCounts = applicants.reduce((acc, applicant) => {
+      const category = applicant.category || "Unknown";
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {});
+
+    return {
+      labels: Object.keys(categoryCounts),
+      datasets: [
+        {
+          label: "Applicants by Category",
+          data: Object.values(categoryCounts),
+          backgroundColor: "#F58634",
+        },
+      ],
+    };
   };
 
-  // Toggle theme
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+  const getStatusDistributionData = () => {
+    const statusCounts = {
+      Accepted: acceptedApplicants.length,
+      Rejected: rejectedApplicants.length,
+      Processing: processingApplicants.length,
+    };
+
+    return {
+      labels: Object.keys(statusCounts),
+      datasets: [
+        {
+          label: "Application Status",
+          data: Object.values(statusCounts),
+          backgroundColor: [
+            "#4CAF50", // Green for Accepted
+            "#F44336", // Red for Rejected
+            "#FFC107", // Yellow for Processing
+          ],
+        },
+      ],
+    };
   };
 
-  // Toggle sidebar
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const hiringTrendsData = getHiringTrendsData();
+  const employeeDistributionData = getEmployeeDistributionData();
+  const statusDistributionData = getStatusDistributionData();
+
+  // Toggle theme and sidebar
+  const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
     <div
@@ -147,7 +207,7 @@ const Dashboard = () => {
           : "bg-gradient-to-r from-gray-800 to-gray-900 text-gray-100"
       }`}
     >
-      {/* Sidebar Toggle Button (Mobile) */}
+      {/* Sidebar Toggle Button */}
       <button
         onClick={toggleSidebar}
         className={`fixed top-4 left-4 z-50 p-2 rounded-full ${
@@ -163,9 +223,9 @@ const Dashboard = () => {
         theme={theme}
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
-        role="admin" // ya "admin" or "hr"
+        role="admin"
       />
-      {/* Sidebar */}
+
       <div
         className={`flex-1 transition-all duration-300 ${
           isSidebarOpen ? "ml-64" : "ml-0"
@@ -173,13 +233,29 @@ const Dashboard = () => {
       >
         <Header theme={theme} toggleTheme={toggleTheme} />
 
-        {/* Cards */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
-            { title: "Total Employees", value: "70" },
-            { title: "Open Positions", value: "8" },
-            { title: "Active Projects", value: "15" },
-            { title: "Revenue", value: "$500,000" },
+            {
+              title: "Total Applicants",
+              value: applicants.length,
+              icon: <FaUserTie />,
+            },
+            {
+              title: "Accepted",
+              value: acceptedApplicants.length,
+              icon: <FaCheck />,
+            },
+            {
+              title: "Rejected",
+              value: rejectedApplicants.length,
+              icon: <FaTimes />,
+            },
+            {
+              title: "Processing",
+              value: processingApplicants.length,
+              icon: <FaBriefcase />,
+            },
           ].map((card, index) => (
             <div
               key={index}
@@ -187,34 +263,43 @@ const Dashboard = () => {
                 theme === "light" ? "bg-white" : "bg-gray-700"
               }`}
             >
-              <h2 className="text-gray-500">{card.title}</h2>
-              <p className="text-2xl font-bold text-[#F58634]">{card.value}</p>
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-gray-500">{card.title}</h2>
+                  <p className="text-2xl font-bold text-[#F58634]">
+                    {card.value}
+                  </p>
+                </div>
+                <div className="text-2xl text-[#F58634]">{card.icon}</div>
+              </div>
             </div>
           ))}
         </div>
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Employee Distribution */}
           <div
             className={`p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ${
               theme === "light" ? "bg-white" : "bg-gray-700"
             }`}
           >
-            <h2 className="text-gray-500 mb-4">Hiring Trends</h2>
-            <Line data={hiringTrendsData} />
-          </div>
-          <div
-            className={`p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ${
-              theme === "light" ? "bg-white" : "bg-gray-700"
-            }`}
-          >
-            <h2 className="text-gray-500 mb-4">Employee Distribution</h2>
+            <h2 className="text-gray-500 mb-4">Applicants by Category</h2>
             <Bar
               data={employeeDistributionData}
               options={{
                 indexAxis: "y", // Horizontal bar chart
               }}
             />
+          </div>
+          {/* Status Distribution */}
+          <div
+            className={`p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ${
+              theme === "light" ? "bg-white" : "bg-gray-700"
+            }`}
+          >
+            <h2 className="text-gray-500 mb-4">Application Status</h2>
+            <Bar data={statusDistributionData} />
           </div>
         </div>
 

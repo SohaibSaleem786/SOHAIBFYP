@@ -19,6 +19,7 @@ import AdminAttendanceManagement from "./components/AdminAttendanceManagement/Ad
 import InterviewSchedule from "./components/InterviewSchedule/InterviewSchedule";
 import AdminInterviewScheduleScreen from "./components/AdminInterviewScheduleScreen/AdminInterviewScheduleScreen";
 import AboutUs from "./components/AboutUs/AboutUs";
+import InterviewEvaluation from "./components/InterviewEvaluation/InterviewEvaluation";
 
 // Add this script to handle direct URL navigation
 // This will be executed when the app first loads
@@ -69,6 +70,7 @@ const App = () => {
           path="/AdminInterviewScheduleScreen"
           element={<AdminInterviewScheduleScreen />}
         />
+        <Route path="/InterviewEvaluation" element={<InterviewEvaluation />} />
         <Route
           path="/AdminAttendanceManagement"
           element={<AdminAttendanceManagement />}
